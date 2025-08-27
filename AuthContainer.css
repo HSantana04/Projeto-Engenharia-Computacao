@@ -1,0 +1,22 @@
+/* Auth Container Styles */
+.auth-container {
+  width: 100%;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* Transição suave entre componentes */
+.auth-container > * {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
