@@ -1,0 +1,222 @@
+.dashboard {
+  min-height: 100vh;
+  width: 100%;
+  background: radial-gradient(1200px 600px at -10% -10%, #eef2ff 0%, transparent 50%),
+              radial-gradient(1200px 600px at 110% 10%, #ecfeff 0%, transparent 50%),
+              linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+}
+
+.dashboard__container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 16px 56px;
+}
+
+.dashboard__header {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+@media (min-width: 768px) {
+  .dashboard__header {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+}
+
+.dashboard__title {
+  font-size: 28px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+}
+
+.dashboard__subtitle {
+  margin-top: 4px;
+  font-size: 13px;
+  color: #475569;
+}
+
+.dashboard__actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn {
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  border: 1px solid transparent;
+  transition: all .2s ease;
+}
+
+.btn-primary {
+  background: #4f46e5;
+  color: #fff;
+}
+.btn-primary:hover { background: #4338ca; }
+
+.btn-outline {
+  background: #ffffff;
+  border-color: #e2e8f0;
+  color: #334155;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+.btn-outline:hover { background: #f8fafc; }
+
+/* KPIs */
+.kpis {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+@media (min-width: 768px) {
+  .kpis { grid-template-columns: repeat(3, 1fr); }
+}
+
+.card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+  background: #ffffff;
+  padding: 20px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.05), 0 8px 24px rgba(2, 6, 23, 0.04);
+}
+
+.card__row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.card__label { font-size: 13px; color: #64748b; }
+.card__value {
+  margin-top: 6px;
+  font-size: 28px;
+  font-weight: 800;
+}
+.card__value.positive { color: #059669; }
+.card__value.negative { color: #e11d48; }
+
+.card__icon {
+  background: #ecfeff;
+  color: #0f766e;
+  border-radius: 12px;
+  padding: 10px;
+}
+
+.card__blur {
+  pointer-events: none;
+  position: absolute;
+  right: -20px;
+  top: -20px;
+  width: 96px;
+  height: 96px;
+  border-radius: 999px;
+  filter: blur(16px);
+  opacity: .6;
+}
+.card__blur--green { background: #dcfce7; }
+.card__blur--red { background: #ffe4e6; }
+
+/* Content grid */
+.content {
+  margin-top: 24px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+@media (min-width: 1024px) {
+  .content {
+    grid-template-columns: 2fr 1fr;
+  }
+}
+
+.panel {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.05), 0 8px 24px rgba(2, 6, 23, 0.04);
+}
+.panel--chart { }
+
+.panel__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.panel__title { font-size: 16px; font-weight: 700; color: #0f172a; }
+
+.legend { display: flex; gap: 8px; font-size: 12px; }
+.legend__pill {
+  border-radius: 999px;
+  padding: 4px 8px;
+}
+.legend__pill--green { background: #dcfce7; color: #065f46; }
+.legend__pill--red { background: #ffe4e6; color: #9f1239; }
+
+.chart { width: 100%; height: 320px; }
+
+/* List */
+.list { list-style: none; margin: 0; padding: 0; border-top: 1px solid #f1f5f9; }
+.list__item { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 1px solid #f1f5f9; }
+.list__left { display: flex; align-items: center; gap: 12px; }
+.list__avatar {
+  width: 36px; height: 36px; border-radius: 999px; display: flex; align-items: center; justify-content: center; font-size: 14px;
+}
+.avatar--green { background: #dcfce7; color: #065f46; }
+.avatar--red { background: #ffe4e6; color: #9f1239; }
+.list__title { font-size: 14px; font-weight: 600; color: #0f172a; }
+.list__meta { display: flex; align-items: center; gap: 8px; }
+.list__date { font-size: 12px; color: #64748b; }
+.badge { font-size: 10px; background: #f1f5f9; color: #334155; border-radius: 999px; padding: 2px 6px; }
+
+.amount { font-size: 14px; font-weight: 700; }
+.amount.positive { color: #059669; }
+.amount.negative { color: #e11d48; }
+
+
+/* ===================== DARK THEME ===================== */
+body.theme-dark .dashboard {
+  background: radial-gradient(1200px 600px at -10% -10%, #0b1220 0%, transparent 50%),
+              radial-gradient(1200px 600px at 110% 10%, #0b1f1d 0%, transparent 50%),
+              linear-gradient(180deg, #0b1020 0%, #0b1020 100%);
+}
+
+body.theme-dark .dashboard__title { color: #e2e8f0; }
+body.theme-dark .dashboard__subtitle { color: #94a3b8; }
+
+body.theme-dark .btn-outline { background: #0f172a; border-color: #1e293b; color: #cbd5e1; }
+body.theme-dark .btn-outline:hover { background: #111827; }
+body.theme-dark .btn-primary { background: #6366f1; }
+body.theme-dark .btn-primary:hover { background: #5458ee; }
+
+body.theme-dark .card { background: #0f172a; box-shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.2); }
+body.theme-dark .card__label { color: #94a3b8; }
+body.theme-dark .card__value.positive { color: #34d399; }
+body.theme-dark .card__value.negative { color: #fb7185; }
+body.theme-dark .card__icon { background: #0b2a28; color: #5eead4; }
+body.theme-dark .card__blur--green { background: rgba(16,185,129,.15); }
+body.theme-dark .card__blur--red { background: rgba(244,63,94,.15); }
+
+body.theme-dark .panel { background: #0f172a; box-shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.2); }
+body.theme-dark .panel__title { color: #e2e8f0; }
+body.theme-dark .legend__pill--green { background: rgba(16,185,129,.15); color: #a7f3d0; }
+body.theme-dark .legend__pill--red { background: rgba(244,63,94,.15); color: #fecdd3; }
+
+body.theme-dark .list { border-top-color: #1f2937; }
+body.theme-dark .list__item { border-bottom-color: #1f2937; }
+body.theme-dark .list__title { color: #e2e8f0; }
+body.theme-dark .list__date { color: #94a3b8; }
+body.theme-dark .badge { background: #1f2937; color: #cbd5e1; }
+body.theme-dark .avatar--green { background: rgba(16,185,129,.15); color: #a7f3d0; }
+body.theme-dark .avatar--red { background: rgba(244,63,94,.15); color: #fecdd3; }
+body.theme-dark .amount.positive { color: #34d399; }
+body.theme-dark .amount.negative { color: #fb7185; }
+
