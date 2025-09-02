@@ -64,6 +64,79 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+/* Responsive Design - Breakpoints aprimorados */
+/* Tablets pequenos e dispositivos móveis grandes */
+@media (max-width: 768px) {
+  h1 {
+    font-size: 2.8em;
+  }
+
+  button {
+    padding: 0.5em 1em;
+    font-size: 0.95em;
+  }
+}
+
+/* Dispositivos móveis médios */
+@media (max-width: 600px) {
+  h1 {
+    font-size: 2.4em;
+  }
+
+  button {
+    padding: 0.45em 0.9em;
+    font-size: 0.9em;
+  }
+}
+
+/* Dispositivos móveis pequenos */
+@media (max-width: 480px) {
+  h1 {
+    font-size: 2em;
+  }
+
+  button {
+    padding: 0.4em 0.8em;
+    font-size: 0.85em;
+  }
+}
+
+/* Dispositivos muito pequenos */
+@media (max-width: 360px) {
+  h1 {
+    font-size: 1.8em;
+  }
+
+  button {
+    padding: 0.35em 0.7em;
+    font-size: 0.8em;
+  }
+}
+
+/* Orientação paisagem em dispositivos móveis */
+@media (max-height: 600px) and (orientation: landscape) {
+  h1 {
+    font-size: 2.2em;
+  }
+
+  button {
+    padding: 0.4em 0.8em;
+    font-size: 0.85em;
+  }
+}
+
+/* Dispositivos de alta resolução */
+@media (min-width: 1200px) {
+  h1 {
+    font-size: 3.6em;
+  }
+
+  button {
+    padding: 0.7em 1.4em;
+    font-size: 1.05em;
+  }
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;

@@ -288,19 +288,66 @@
     cursor: not-allowed;
 }
 
-/* Responsive Design */
-@media (max-width: 480px) {
+/* Responsive Design - Breakpoints aprimorados */
+/* Tablets pequenos e dispositivos móveis grandes */
+@media (max-width: 768px) {
+    .login-container {
+        padding: 15px;
+    }
+
+    .login-card {
+        padding: 1.5rem;
+        border-radius: 18px;
+        max-width: 380px;
+    }
+
+    .login-header h1 {
+        font-size: 26px;
+    }
+
+    .login-header p {
+        font-size: 15px;
+    }
+
+    .form-group input {
+        padding: 11px 14px;
+        font-size: 15px;
+    }
+
+    .login-button {
+        padding: 13px 22px;
+        font-size: 15px;
+    }
+}
+
+/* Dispositivos móveis médios */
+@media (max-width: 600px) {
     .login-container {
         padding: 10px;
     }
 
     .login-card {
-        padding: 30px 20px;
+        padding: 1.25rem;
         border-radius: 15px;
+        max-width: 350px;
     }
 
     .login-header h1 {
         font-size: 24px;
+    }
+
+    .login-header p {
+        font-size: 14px;
+    }
+
+    .form-group input {
+        padding: 10px 12px;
+        font-size: 14px;
+    }
+
+    .login-button {
+        padding: 12px 20px;
+        font-size: 14px;
     }
 
     .form-options {
@@ -311,6 +358,137 @@
 
     .forgot-password {
         align-self: flex-end;
+    }
+}
+
+/* Dispositivos móveis pequenos */
+@media (max-width: 480px) {
+    .login-container {
+        padding: 8px;
+    }
+
+    .login-card {
+        padding: 1rem;
+        border-radius: 12px;
+        max-width: 100%;
+        margin: 0 8px;
+    }
+
+    .login-header h1 {
+        font-size: 22px;
+    }
+
+    .login-header p {
+        font-size: 13px;
+    }
+
+    .login-form {
+        gap: 18px;
+    }
+
+    .form-group input {
+        padding: 9px 10px;
+        font-size: 13px;
+        border-radius: 8px;
+    }
+
+    .login-button {
+        padding: 11px 18px;
+        font-size: 13px;
+        border-radius: 8px;
+    }
+
+    .password-toggle {
+        font-size: 16px;
+        right: 10px;
+    }
+
+    .form-options {
+        gap: 12px;
+    }
+}
+
+/* Dispositivos muito pequenos */
+@media (max-width: 360px) {
+    .login-container {
+        padding: 5px;
+    }
+
+    .login-card {
+        padding: 0.75rem;
+        border-radius: 10px;
+    }
+
+    .login-header h1 {
+        font-size: 20px;
+    }
+
+    .login-header p {
+        font-size: 12px;
+    }
+
+    .form-group input {
+        padding: 8px 8px;
+        font-size: 12px;
+        border-radius: 6px;
+    }
+
+    .login-button {
+        padding: 10px 16px;
+        font-size: 12px;
+        border-radius: 6px;
+    }
+
+    .form-options {
+        gap: 10px;
+    }
+}
+
+/* Orientação paisagem em dispositivos móveis */
+@media (max-height: 600px) and (orientation: landscape) {
+    .login-container {
+        padding: 10px;
+        min-height: 100vh;
+    }
+
+    .login-card {
+        padding: 1rem;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .login-header {
+        margin-bottom: 20px;
+    }
+
+    .login-form {
+        gap: 15px;
+    }
+}
+
+/* Dispositivos de alta resolução */
+@media (min-width: 1200px) {
+    .login-card {
+        max-width: 450px;
+        padding: 2.5rem;
+    }
+
+    .login-header h1 {
+        font-size: 32px;
+    }
+
+    .login-header p {
+        font-size: 18px;
+    }
+
+    .form-group input {
+        padding: 14px 18px;
+        font-size: 17px;
+    }
+
+    .login-button {
+        padding: 16px 28px;
+        font-size: 17px;
     }
 }
 

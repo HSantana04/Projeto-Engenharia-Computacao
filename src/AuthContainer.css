@@ -24,3 +24,43 @@
         transform: translateX(0);
     }
 }
+
+/* Responsive Design - Breakpoints aprimorados */
+/* Tablets pequenos e dispositivos móveis grandes */
+@media (max-width: 768px) {
+    .auth-container {
+        width: 100%;
+        min-height: 100vh;
+    }
+}
+
+/* Dispositivos móveis médios */
+@media (max-width: 600px) {
+    .auth-container {
+        width: 100%;
+        min-height: 100vh;
+    }
+}
+
+/* Dispositivos móveis pequenos */
+@media (max-width: 480px) {
+    .auth-container {
+        width: 100%;
+        min-height: 100vh;
+    }
+}
+
+/* Orientação paisagem em dispositivos móveis */
+@media (max-height: 600px) and (orientation: landscape) {
+    .auth-container {
+        min-height: 100vh;
+    }
+}
+
+/* Dispositivos de alta resolução */
+@media (min-width: 1200px) {
+    .auth-container {
+        width: 100vw;
+        min-height: 100vh;
+    }
+}

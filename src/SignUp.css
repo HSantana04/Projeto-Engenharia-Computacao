@@ -16,10 +16,12 @@
     background: white;
     border-radius: 20px;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-    padding: 40px;
+    padding: 2rem;
     width: 100%;
     max-width: 500px;
     animation: slideUp 0.6s ease-out;
+    overflow: hidden;
+    box-sizing: border-box;
 }
 
 @keyframes slideUp {
@@ -56,18 +58,24 @@
     display: flex;
     flex-direction: column;
     gap: 20px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .name-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 15px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .form-group {
     display: flex;
     flex-direction: column;
     gap: 8px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .form-group label {
@@ -83,6 +91,9 @@
     font-size: 16px;
     transition: all 0.2s ease;
     background: #f7fafc;
+    width: 100%;
+    box-sizing: border-box;
+    min-width: 0;
 }
 
 .form-group input:focus {
@@ -112,11 +123,16 @@
     position: relative;
     display: flex;
     align-items: center;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .password-input-container input {
     flex: 1;
     padding-right: 50px;
+    width: 100%;
+    box-sizing: border-box;
+    min-width: 0;
 }
 
 .password-toggle {
@@ -210,6 +226,8 @@
     cursor: pointer;
     transition: all 0.2s ease;
     margin-top: 10px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .signup-button:hover:not(:disabled) {
@@ -288,19 +306,56 @@
     cursor: not-allowed;
 }
 
-/* Responsive Design */
+/* Responsive Design - Breakpoints aprimorados */
+/* Tablets pequenos e dispositivos móveis grandes */
+@media (max-width: 768px) {
+    .signup-container {
+        padding: 15px;
+    }
+
+    .signup-card {
+        padding: 1.5rem;
+        border-radius: 18px;
+        max-width: 450px;
+    }
+
+    .signup-header h1 {
+        font-size: 26px;
+    }
+
+    .signup-header p {
+        font-size: 15px;
+    }
+
+    .form-group input {
+        padding: 11px 14px;
+        font-size: 15px;
+    }
+
+    .signup-button {
+        padding: 13px 22px;
+        font-size: 15px;
+    }
+}
+
+/* Dispositivos móveis médios */
 @media (max-width: 600px) {
     .signup-container {
         padding: 10px;
     }
 
     .signup-card {
-        padding: 30px 20px;
+        padding: 1.25rem;
         border-radius: 15px;
+        max-width: 400px;
     }
 
     .signup-header h1 {
         font-size: 24px;
+    }
+
+    .signup-header p {
+        font-size: 14px;
     }
 
     .name-row {
@@ -308,8 +363,149 @@
         gap: 20px;
     }
 
+    .form-group input {
+        padding: 10px 12px;
+        font-size: 14px;
+    }
+
+    .signup-button {
+        padding: 12px 20px;
+        font-size: 14px;
+    }
+
     .checkbox-container {
         font-size: 13px;
+    }
+}
+
+/* Dispositivos móveis pequenos */
+@media (max-width: 480px) {
+    .signup-container {
+        padding: 8px;
+    }
+
+    .signup-card {
+        padding: 1rem;
+        border-radius: 12px;
+        max-width: 100%;
+        margin: 0 8px;
+    }
+
+    .signup-header h1 {
+        font-size: 22px;
+    }
+
+    .signup-header p {
+        font-size: 13px;
+    }
+
+    .signup-form {
+        gap: 18px;
+    }
+
+    .form-group input {
+        padding: 9px 10px;
+        font-size: 13px;
+        border-radius: 8px;
+    }
+
+    .signup-button {
+        padding: 11px 18px;
+        font-size: 13px;
+        border-radius: 8px;
+    }
+
+    .checkbox-container {
+        font-size: 12px;
+    }
+
+    .password-toggle {
+        font-size: 16px;
+        right: 10px;
+    }
+}
+
+/* Dispositivos muito pequenos */
+@media (max-width: 360px) {
+    .signup-container {
+        padding: 5px;
+    }
+
+    .signup-card {
+        padding: 0.75rem;
+        border-radius: 10px;
+    }
+
+    .signup-header h1 {
+        font-size: 20px;
+    }
+
+    .signup-header p {
+        font-size: 12px;
+    }
+
+    .form-group input {
+        padding: 8px 8px;
+        font-size: 12px;
+        border-radius: 6px;
+    }
+
+    .signup-button {
+        padding: 10px 16px;
+        font-size: 12px;
+        border-radius: 6px;
+    }
+
+    .checkbox-container {
+        font-size: 11px;
+    }
+}
+
+/* Orientação paisagem em dispositivos móveis */
+@media (max-height: 600px) and (orientation: landscape) {
+    .signup-container {
+        padding: 10px;
+        min-height: 100vh;
+    }
+
+    .signup-card {
+        padding: 1rem;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .signup-header {
+        margin-bottom: 20px;
+    }
+
+    .signup-form {
+        gap: 15px;
+    }
+}
+
+/* Dispositivos de alta resolução */
+@media (min-width: 1200px) {
+    .signup-card {
+        max-width: 550px;
+        padding: 2.5rem;
+    }
+
+    .signup-header h1 {
+        font-size: 32px;
+    }
+
+    .signup-header p {
+        font-size: 18px;
+    }
+
+    .form-group input {
+        padding: 14px 18px;
+        font-size: 17px;
+    }
+
+    .signup-button {
+        padding: 16px 28px;
+        font-size: 17px;
     }
 }
 

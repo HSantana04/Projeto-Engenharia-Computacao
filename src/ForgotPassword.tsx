@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type ChangeEvent, type FormEvent } from 'react';
 import './ForgotPassword.css';
 
 interface ForgotPasswordFormData {
@@ -44,7 +44,7 @@ function ForgotPassword({ onSwitchToLogin }: ForgotPasswordProps) {
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({
             ...prev,
@@ -60,7 +60,7 @@ function ForgotPassword({ onSwitchToLogin }: ForgotPasswordProps) {
         }
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
 
         if (!validateForm()) {

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type ChangeEvent, type FormEvent } from 'react';
 import './Login.css';
 import { useAuth } from './contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -54,7 +54,7 @@ function Login({ onSwitchToSignUp, onSwitchToForgotPassword }: LoginProps) {
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
         const { name, value, type, checked } = e.target;
         setFormData(prev => ({
             ...prev,
@@ -70,7 +70,7 @@ function Login({ onSwitchToSignUp, onSwitchToForgotPassword }: LoginProps) {
         }
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
 
         if (!validateForm()) {

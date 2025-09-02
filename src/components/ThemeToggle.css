@@ -31,4 +31,130 @@
 
 .theme-toggle__label { font-size: 12px; color: #475569; font-weight: 600; }
 
+/* Responsive Design - Breakpoints aprimorados */
+/* Tablets pequenos e dispositivos móveis grandes */
+@media (max-width: 768px) {
+  .theme-toggle {
+    gap: 6px;
+  }
+
+  .switch {
+    width: 42px;
+    height: 24px;
+  }
+
+  .switch__knob {
+    width: 18px;
+    height: 18px;
+  }
+
+  .switch--on .switch__knob { 
+    left: 22px; 
+  }
+
+  .theme-toggle__label { 
+    font-size: 11px; 
+  }
+}
+
+/* Dispositivos móveis médios */
+@media (max-width: 600px) {
+  .theme-toggle {
+    gap: 5px;
+  }
+
+  .switch {
+    width: 40px;
+    height: 22px;
+  }
+
+  .switch__knob {
+    width: 16px;
+    height: 16px;
+  }
+
+  .switch--on .switch__knob { 
+    left: 20px; 
+  }
+
+  .theme-toggle__label { 
+    font-size: 10px; 
+  }
+}
+
+/* Dispositivos móveis pequenos */
+@media (max-width: 480px) {
+  .theme-toggle {
+    gap: 4px;
+  }
+
+  .switch {
+    width: 38px;
+    height: 20px;
+  }
+
+  .switch__knob {
+    width: 14px;
+    height: 14px;
+  }
+
+  .switch--on .switch__knob { 
+    left: 18px; 
+  }
+
+  .theme-toggle__label { 
+    font-size: 9px; 
+  }
+}
+
+/* Dispositivos muito pequenos */
+@media (max-width: 360px) {
+  .theme-toggle {
+    gap: 3px;
+  }
+
+  .switch {
+    width: 36px;
+    height: 18px;
+  }
+
+  .switch__knob {
+    width: 12px;
+    height: 12px;
+  }
+
+  .switch--on .switch__knob { 
+    left: 16px; 
+  }
+
+  .theme-toggle__label { 
+    font-size: 8px; 
+  }
+}
+
+/* Dispositivos de alta resolução */
+@media (min-width: 1200px) {
+  .theme-toggle {
+    gap: 10px;
+  }
+
+  .switch {
+    width: 50px;
+    height: 28px;
+  }
+
+  .switch__knob {
+    width: 22px;
+    height: 22px;
+  }
+
+  .switch--on .switch__knob { 
+    left: 26px; 
+  }
+
+  .theme-toggle__label { 
+    font-size: 13px; 
+  }
+}
+
 
