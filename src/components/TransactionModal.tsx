@@ -33,6 +33,7 @@ interface TransactionModalProps {
 interface TransactionFormData {
   type: 'receita' | 'despesa';
   title: string;
+  subcategory: string;
   amount: string;
   category: string;
   date: string;
@@ -50,6 +51,96 @@ const CATEGORIES = {
   despesa: ['Alimentação', 'Transporte', 'Moradia', 'Saúde', 'Educação', 'Lazer', 'Contas', 'Serviços Financeiros', 'Outros']
 };
 
+const SUBCATEGORIES = {
+  'Alimentação': [
+    'Restaurante',
+    'Mercado',
+    'Delivery',
+    'Café',
+    'Lanche',
+    'Supermercado',
+    'Outros'
+  ],
+  'Transporte': [
+    'Combustível',
+    'Ônibus',
+    'Metrô',
+    'Táxi/Uber',
+    'Estacionamento',
+    'Manutenção',
+    'Seguro',
+    'Multas',
+    'Outros'
+  ],
+  'Moradia': [
+    'Aluguel',
+    'Financiamento',
+    'Condomínio',
+    'IPTU',
+    'Água',
+    'Luz',
+    'Gás',
+    'Internet',
+    'Telefone',
+    'Manutenção',
+    'Outros'
+  ],
+  'Saúde': [
+    'Plano de Saúde',
+    'Médico',
+    'Dentista',
+    'Farmácia',
+    'Exames',
+    'Terapia',
+    'Academia',
+    'Outros'
+  ],
+  'Educação': [
+    'Mensalidade',
+    'Material',
+    'Cursos',
+    'Livros',
+    'Certificações',
+    'Outros'
+  ],
+  'Lazer': [
+    'Cinema',
+    'Teatro',
+    'Shows',
+    'Viagens',
+    'Hobbies',
+    'Esportes',
+    'Restaurantes',
+    'Outros'
+  ],
+  'Contas': [
+    'Água',
+    'Luz',
+    'Gás',
+    'Internet',
+    'Telefone',
+    'Celular',
+    'TV por assinatura',
+    'Segurança',
+    'Outros'
+  ],
+  'Serviços Financeiros': [
+    'Empréstimo',
+    'Financiamento',
+    'Juros',
+    'Tarifas bancárias',
+    'Seguro',
+    'Investimentos',
+    'Outros'
+  ],
+  'Outros': [
+    'Diversos',
+    'Imprevistos',
+    'Doações',
+    'Outros'
+  ]
+};
+
 function TransactionModal({ 
   isOpen, 
   onClose, 
@@ -61,6 +152,7 @@ function TransactionModal({
   const [formData, setFormData] = useState<TransactionFormData>({
     type: 'receita',
     title: '',
+    subcategory: '',
     amount: '',
     category: '',
     date: new Date().toISOString().split('T')[0]
@@ -72,9 +164,11 @@ function TransactionModal({
   // Atualizar formulário quando transactionToEdit mudar
   useEffect(() => {
     if (transactionToEdit && mode === 'edit') {
+      const isExpense = transactionToEdit.amount < 0;
       setFormData({
-        type: transactionToEdit.amount > 0 ? 'receita' : 'despesa',
+        type: isExpense ? 'despesa' : 'receita',
         title: transactionToEdit.description,
+        subcategory: '', // Será determinado pela lógica posterior se necessário
         amount: Math.abs(transactionToEdit.amount).toString(),
         category: transactionToEdit.category,
         date: transactionToEdit.date
@@ -84,6 +178,7 @@ function TransactionModal({
       setFormData({
         type: 'receita',
         title: '',
+        subcategory: '',
         amount: '',
         category: '',
         date: new Date().toISOString().split('T')[0]
@@ -95,10 +190,19 @@ function TransactionModal({
   const validateForm = (): boolean => {
     const newErrors: TransactionFormErrors = {};
 
-    if (!formData.title.trim()) {
-      newErrors.title = 'Título é obrigatório';
-    } else if (formData.title.trim().length < 2) {
-      newErrors.title = 'Título deve ter pelo menos 2 caracteres';
+    // Validação do título/subcategoria
+    if (formData.type === 'receita') {
+      if (!formData.title.trim()) {
+        newErrors.title = 'Título é obrigatório';
+      } else if (formData.title.trim().length < 2) {
+        newErrors.title = 'Título deve ter pelo menos 2 caracteres';
+      }
+    } else if (formData.type === 'despesa') {
+      if (formData.category && !formData.subcategory) {
+        newErrors.title = 'Subcategoria é obrigatória';
+      } else if (!formData.category) {
+        newErrors.title = 'Categoria deve ser selecionada primeiro';
+      }
     }
 
     if (!formData.amount) {
@@ -137,12 +241,33 @@ function TransactionModal({
       }));
     }
 
-    // Resetar categoria quando mudar o tipo
+    // Resetar categoria e subcategoria quando mudar o tipo
     if (name === 'type') {
       setFormData(prev => ({
         ...prev,
         type: value as 'receita' | 'despesa',
-        category: ''
+        category: '',
+        subcategory: '',
+        title: ''
+      }));
+    }
+
+    // Resetar subcategoria quando mudar a categoria
+    if (name === 'category') {
+      setFormData(prev => ({
+        ...prev,
+        category: value,
+        subcategory: '',
+        title: prev.type === 'receita' ? prev.title : ''
+      }));
+    }
+
+    // Atualizar título baseado na subcategoria para despesas
+    if (name === 'subcategory' && formData.type === 'despesa') {
+      setFormData(prev => ({
+        ...prev,
+        subcategory: value,
+        title: value
       }));
     }
   };
@@ -160,9 +285,11 @@ function TransactionModal({
       // Simular delay de API
       await new Promise(resolve => setTimeout(resolve, 500));
 
+      const finalTitle = formData.type === 'despesa' ? formData.subcategory : formData.title.trim();
+
       const transactionData = {
         type: formData.type,
-        title: formData.title.trim(),
+        title: finalTitle,
         amount: formData.type === 'receita' ? parseFloat(formData.amount) : -parseFloat(formData.amount),
         category: formData.category,
         date: formData.date
@@ -178,6 +305,7 @@ function TransactionModal({
       setFormData({
         type: 'receita',
         title: '',
+        subcategory: '',
         amount: '',
         category: '',
         date: new Date().toISOString().split('T')[0]
@@ -196,6 +324,7 @@ function TransactionModal({
       setFormData({
         type: 'receita',
         title: '',
+        subcategory: '',
         amount: '',
         category: '',
         date: new Date().toISOString().split('T')[0]
@@ -257,19 +386,40 @@ function TransactionModal({
             </label>
           </div>
 
-          {/* Título */}
+          {/* Título/Subcategoria */}
           <div className="form-group">
-            <label htmlFor="title">Título da Transação</label>
-            <input
-              type="text"
-              id="title"
-              name="title"
-              value={formData.title}
-              onChange={handleInputChange}
-              placeholder={formData.type === 'receita' ? 'Ex: Salário, Freelance...' : 'Ex: Mercado, Conta de Luz...'}
-              className={errors.title ? 'error' : ''}
-              disabled={isLoading}
-            />
+            <label htmlFor={formData.type === 'despesa' && formData.category ? 'subcategory' : 'title'}>
+              {formData.type === 'despesa' && formData.category ? 'Subcategoria' : 'Título da Transação'}
+            </label>
+
+            {formData.type === 'receita' || !formData.category ? (
+              <input
+                type="text"
+                id="title"
+                name="title"
+                value={formData.title}
+                onChange={handleInputChange}
+                placeholder={formData.type === 'receita' ? 'Ex: Salário, Freelance...' : 'Selecione uma categoria primeiro'}
+                className={errors.title ? 'error' : ''}
+                disabled={isLoading || (formData.type === 'despesa' && !formData.category)}
+              />
+            ) : (
+              <select
+                id="subcategory"
+                name="subcategory"
+                value={formData.subcategory}
+                onChange={handleInputChange}
+                className={errors.title ? 'error' : ''}
+                disabled={isLoading}
+              >
+                <option value="">Selecione uma subcategoria</option>
+                {SUBCATEGORIES[formData.category as keyof typeof SUBCATEGORIES]?.map(subcategory => (
+                  <option key={subcategory} value={subcategory}>
+                    {subcategory}
+                  </option>
+                ))}
+              </select>
+            )}
             {errors.title && <span className="error-message">{errors.title}</span>}
           </div>
 

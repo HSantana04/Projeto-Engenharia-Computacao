@@ -1,29 +1,54 @@
 import { Link, useLocation } from "react-router-dom";
+import { useTheme } from "../contexts/ThemeContext";
+import "./Sidebar.css";
 
 const Sidebar: React.FC = () => {
     const location = useLocation();
+    const { theme } = useTheme();
 
     const menuItems = [
-        { name: "Dashboard", path: "/dashboard", icon: "fa-solid fa-chart-line" },
-        { name: "Profile", path: "/profile", icon: "fa-solid fa-user" }
+        { name: "Dashboard", path: "/dashboard", icon: "📊" },
+        { name: "Perfil", path: "/profile", icon: "👤" }
     ];
 
     return (
-        <div className="h-screen w-64 bg-gray-900 text-white flex flex-col p-4">
-            <h2 className="text-2xl font-bold mb-8">Meu App</h2>
-            <nav className="flex flex-col gap-4">
-                {menuItems.map((item) => (
-                    <Link
-                        key={item.path}
-                        to={item.path}
-                        className={`p-2 rounded hover:bg-gray-700 ${location.pathname === item.path ? "bg-gray-700" : ""
-                            }`}
-                    >
-                        {item.name}
-                    </Link>
-                ))}
+        <aside className="sidebar">
+            <div className="sidebar__header">
+                <h1 className="sidebar__title">Gestão Financeira</h1>
+                <p className="sidebar__subtitle">Controle suas finanças</p>
+            </div>
+            
+            <nav className="sidebar__nav">
+                <ul className="sidebar__menu">
+                    {menuItems.map((item) => (
+                        <li key={item.path} className="sidebar__item">
+                            <Link
+                                to={item.path}
+                                className={`sidebar__link ${location.pathname === item.path ? "active" : ""}`}
+                            >
+                                <span className="sidebar__icon">{item.icon}</span>
+                                <span className="sidebar__text">{item.name}</span>
+                            </Link>
+                        </li>
+                    ))}
+                </ul>
             </nav>
-        </div>
+            
+            <div className="sidebar__footer">
+                <div className="sidebar__user">
+                    <div className="sidebar__avatar">
+                        👤
+                    </div>
+                    <div className="sidebar__user-info">
+                        <p className="sidebar__user-name">Usuário</p>
+                        <p className="sidebar__user-email">usuario@email.com</p>
+                    </div>
+                </div>
+                <button className="sidebar__toggle">
+                    {theme === 'dark' ? '🌙' : '☀️'}
+                </button>
+            </div>
+        </aside>
     );
 };
 

@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import './Dashboard.css';
 import ThemeToggle from '../components/ThemeToggle';
@@ -66,28 +67,9 @@ function Dashboard() {
     return months;
   }, [transactions]);
 
-  // Carregar transações do backend quando disponível
+    // TODO: Implementar carregamento de transações do backend quando disponível
   useEffect(() => {
-    const loadTransactions = async () => {
-      try {
-       setIsLoading(true);
-        const response = await transactionService.getTransactions();
-        
-        if (response.success && response.data) {
-          setTransactions(response.data);
-        } else {
-          console.warn('Usando dados mockados:', response.error);
-        }
-      } catch (error) {
-        console.error('Erro ao carregar transações:', error);
-        // Manter dados mockados em caso de erro
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    // Comentar esta linha para usar apenas dados mockados durante desenvolvimento
-    // loadTransactions();
+    // Por enquanto usando apenas dados mockados
   }, []);
 
   const handleAddTransaction = async (transactionData: {
@@ -341,7 +323,7 @@ function Dashboard() {
           <div className="panel">
             <div className="panel__head">
               <h2 className="panel__title">Últimas transações</h2>
-              <a className="link" href="#">Ver todas</a>
+              <Link className="link" to="/transactions">Ver todas</Link>
             </div>
             <ul className="list">
               {transactions.slice(0, 5).map(t => (
