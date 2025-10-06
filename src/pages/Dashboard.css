@@ -44,6 +44,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-wrap: wrap;
 }
 
 .btn {
@@ -53,6 +54,7 @@
   font-weight: 600;
   border: 1px solid transparent;
   transition: all .2s ease;
+  cursor: pointer;
 }
 
 .btn-primary {
@@ -68,6 +70,35 @@
   box-shadow: 0 1px 2px rgba(0,0,0,.04);
 }
 .btn-outline:hover { background: #f8fafc; }
+
+/* Error Banner */
+.error-banner {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #dc2626;
+  font-weight: 500;
+}
+
+.error-banner button {
+  background: none;
+  border: none;
+  color: #dc2626;
+  cursor: pointer;
+  font-size: 18px;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.error-banner button:hover {
+  background: rgba(220, 38, 38, 0.1);
+}
 
 /* KPIs */
 .kpis {
@@ -150,10 +181,12 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 .panel__title { font-size: 16px; font-weight: 700; color: #0f172a; }
 
-.legend { display: flex; gap: 8px; font-size: 12px; }
+.legend { display: flex; gap: 8px; font-size: 12px; flex-wrap: wrap; }
 .legend__pill {
   border-radius: 999px;
   padding: 4px 8px;
@@ -165,15 +198,38 @@
 
 /* List */
 .list { list-style: none; margin: 0; padding: 0; border-top: 1px solid #f1f5f9; }
-.list__item { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 1px solid #f1f5f9; }
-.list__left { display: flex; align-items: center; gap: 12px; }
+.list__item { 
+  display: flex; 
+  align-items: center; 
+  justify-content: space-between; 
+  gap: 12px; 
+  padding: 12px 0; 
+  border-bottom: 1px solid #f1f5f9; 
+  flex-wrap: wrap; 
+}
+
+.list__left { 
+  display: flex; 
+  align-items: center; 
+  gap: 12px; 
+  flex: 1;
+  min-width: 0;
+}
+
+.list__right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
 .list__avatar {
   width: 36px; height: 36px; border-radius: 999px; display: flex; align-items: center; justify-content: center; font-size: 14px;
 }
 .avatar--green { background: #dcfce7; color: #065f46; }
 .avatar--red { background: #ffe4e6; color: #9f1239; }
 .list__title { font-size: 14px; font-weight: 600; color: #0f172a; }
-.list__meta { display: flex; align-items: center; gap: 8px; }
+.list__meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .list__date { font-size: 12px; color: #64748b; }
 .badge { font-size: 10px; background: #f1f5f9; color: #334155; border-radius: 999px; padding: 2px 6px; }
 
@@ -181,6 +237,472 @@
 .amount.positive { color: #059669; }
 .amount.negative { color: #e11d48; }
 
+/* List Actions */
+.list__actions {
+  display: flex;
+  gap: 8px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.list__item:hover .list__actions {
+  opacity: 1;
+}
+
+.action-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+}
+
+.action-btn--edit {
+  color: #059669;
+}
+
+.action-btn--edit:hover {
+  background: #dcfce7;
+  color: #065f46;
+}
+
+.action-btn--delete {
+  color: #e11d48;
+}
+
+.action-btn--delete:hover {
+  background: #ffe4e6;
+  color: #9f1239;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #64748b;
+}
+
+.empty-state p {
+  margin: 0 0 20px 0;
+  font-size: 16px;
+}
+
+.empty-state .btn {
+  margin: 0 auto;
+}
+
+/* Link styles */
+.link {
+  color: #4f46e5;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+  transition: color 0.2s ease;
+}
+
+.link:hover {
+  color: #4338ca;
+  text-decoration: underline;
+}
+
+/* Responsive Design - Breakpoints aprimorados */
+/* Tablets pequenos */
+@media (max-width: 768px) {
+  .dashboard__container {
+    padding: 24px 12px 40px;
+  }
+
+  .dashboard__title {
+    font-size: 24px;
+  }
+
+  .dashboard__subtitle {
+    font-size: 12px;
+  }
+
+  .dashboard__actions {
+    gap: 8px;
+  }
+
+  .btn {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+
+  .error-banner {
+    padding: 10px 14px;
+    margin-bottom: 20px;
+    font-size: 14px;
+  }
+
+  .card {
+    padding: 16px;
+    border-radius: 12px;
+  }
+
+  .card__value {
+    font-size: 24px;
+  }
+
+  .panel {
+    padding: 16px;
+    border-radius: 12px;
+  }
+
+  .chart {
+    height: 280px;
+  }
+
+  .list__actions {
+    opacity: 1;
+  }
+
+  .empty-state {
+    padding: 30px 16px;
+  }
+
+  .empty-state p {
+    font-size: 15px;
+  }
+}
+
+/* Dispositivos móveis médios */
+@media (max-width: 600px) {
+  .dashboard__container {
+    padding: 20px 8px 32px;
+  }
+
+  .dashboard__title {
+    font-size: 22px;
+  }
+
+  .dashboard__subtitle {
+    font-size: 11px;
+  }
+
+  .dashboard__actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .btn {
+    padding: 10px 14px;
+    font-size: 14px;
+    text-align: center;
+  }
+
+  .error-banner {
+    padding: 8px 12px;
+    margin-bottom: 16px;
+    font-size: 13px;
+  }
+
+  .kpis {
+    gap: 12px;
+  }
+
+  .card {
+    padding: 14px;
+    border-radius: 10px;
+  }
+
+  .card__value {
+    font-size: 20px;
+  }
+
+  .card__icon {
+    padding: 8px;
+  }
+
+  .panel {
+    padding: 14px;
+    border-radius: 10px;
+  }
+
+  .panel__head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .chart {
+    height: 240px;
+  }
+
+  .list__item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .list__left {
+    justify-content: flex-start;
+  }
+
+  .list__right {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .list__meta {
+    justify-content: flex-start;
+  }
+
+  .list__actions {
+    opacity: 1;
+  }
+
+  .empty-state {
+    padding: 25px 14px;
+  }
+
+  .empty-state p {
+    font-size: 14px;
+  }
+}
+
+/* Dispositivos móveis pequenos */
+@media (max-width: 480px) {
+  .dashboard__container {
+    padding: 16px 6px 24px;
+  }
+
+  .dashboard__title {
+    font-size: 20px;
+  }
+
+  .dashboard__subtitle {
+    font-size: 10px;
+  }
+
+  .error-banner {
+    padding: 6px 10px;
+    margin-bottom: 12px;
+    font-size: 12px;
+  }
+
+  .card {
+    padding: 12px;
+    border-radius: 8px;
+  }
+
+  .card__value {
+    font-size: 18px;
+  }
+
+  .card__icon {
+    padding: 6px;
+  }
+
+  .panel {
+    padding: 12px;
+    border-radius: 8px;
+  }
+
+  .chart {
+    height: 200px;
+  }
+
+  .legend {
+    font-size: 11px;
+  }
+
+  .legend__pill {
+    padding: 3px 6px;
+  }
+
+  .list__avatar {
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+  }
+
+  .list__title {
+    font-size: 13px;
+  }
+
+  .list__date {
+    font-size: 11px;
+  }
+
+  .badge {
+    font-size: 9px;
+    padding: 1px 4px;
+  }
+
+  .amount {
+    font-size: 13px;
+  }
+
+  .action-btn {
+    width: 24px;
+    height: 24px;
+    font-size: 12px;
+  }
+
+  .empty-state {
+    padding: 20px 12px;
+  }
+
+  .empty-state p {
+    font-size: 13px;
+  }
+}
+
+/* Dispositivos muito pequenos */
+@media (max-width: 360px) {
+  .dashboard__container {
+    padding: 12px 4px 20px;
+  }
+
+  .dashboard__title {
+    font-size: 18px;
+  }
+
+  .dashboard__subtitle {
+    font-size: 9px;
+  }
+
+  .error-banner {
+    padding: 4px 8px;
+    margin-bottom: 8px;
+    font-size: 11px;
+  }
+
+  .card {
+    padding: 10px;
+    border-radius: 6px;
+  }
+
+  .card__value {
+    font-size: 16px;
+  }
+
+  .panel {
+    padding: 10px;
+    border-radius: 6px;
+  }
+
+  .chart {
+    height: 180px;
+  }
+
+  .list__avatar {
+    width: 28px;
+    height: 28px;
+    font-size: 11px;
+  }
+
+  .list__title {
+    font-size: 12px;
+  }
+
+  .action-btn {
+    width: 20px;
+    height: 20px;
+    font-size: 10px;
+  }
+
+  .empty-state {
+    padding: 16px 10px;
+  }
+
+  .empty-state p {
+    font-size: 12px;
+  }
+}
+
+/* Orientação paisagem em dispositivos móveis */
+@media (max-height: 600px) and (orientation: landscape) {
+  .dashboard__container {
+    padding: 16px 12px 24px;
+  }
+
+  .dashboard__header {
+    margin-bottom: 16px;
+  }
+
+  .error-banner {
+    margin-bottom: 12px;
+  }
+
+  .kpis {
+    gap: 12px;
+  }
+
+  .card {
+    padding: 14px;
+  }
+
+  .content {
+    gap: 16px;
+  }
+
+  .panel {
+    padding: 14px;
+  }
+
+  .chart {
+    height: 200px;
+  }
+
+  .empty-state {
+    padding: 20px 16px;
+  }
+}
+
+/* Dispositivos de alta resolução */
+@media (min-width: 1200px) {
+  .dashboard__container {
+    padding: 40px 20px 64px;
+  }
+
+  .dashboard__title {
+    font-size: 32px;
+  }
+
+  .dashboard__subtitle {
+    font-size: 14px;
+  }
+
+  .error-banner {
+    padding: 16px 20px;
+    margin-bottom: 32px;
+    font-size: 16px;
+  }
+
+  .card {
+    padding: 24px;
+  }
+
+  .card__value {
+    font-size: 32px;
+  }
+
+  .panel {
+    padding: 24px;
+  }
+
+  .chart {
+    height: 360px;
+  }
+
+  .empty-state {
+    padding: 50px 24px;
+  }
+
+  .empty-state p {
+    font-size: 18px;
+  }
+}
 
 /* ===================== DARK THEME ===================== */
 body.theme-dark .dashboard {
@@ -196,6 +718,15 @@ body.theme-dark .btn-outline { background: #0f172a; border-color: #1e293b; color
 body.theme-dark .btn-outline:hover { background: #111827; }
 body.theme-dark .btn-primary { background: #6366f1; }
 body.theme-dark .btn-primary:hover { background: #5458ee; }
+
+body.theme-dark .error-banner { 
+  background: rgba(239, 68, 68, 0.1); 
+  border-color: rgba(239, 68, 68, 0.3); 
+  color: #fca5a5; 
+}
+
+body.theme-dark .error-banner button { color: #fca5a5; }
+body.theme-dark .error-banner button:hover { background: rgba(239, 68, 68, 0.2); }
 
 body.theme-dark .card { background: #0f172a; box-shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.2); }
 body.theme-dark .card__label { color: #94a3b8; }
@@ -219,4 +750,11 @@ body.theme-dark .avatar--green { background: rgba(16,185,129,.15); color: #a7f3d
 body.theme-dark .avatar--red { background: rgba(244,63,94,.15); color: #fecdd3; }
 body.theme-dark .amount.positive { color: #34d399; }
 body.theme-dark .amount.negative { color: #fb7185; }
+
+body.theme-dark .action-btn--edit:hover { background: rgba(16,185,129,.2); color: #a7f3d0; }
+body.theme-dark .action-btn--delete:hover { background: rgba(239,68,68,.2); color: #fecaca; }
+
+body.theme-dark .empty-state { color: #94a3b8; }
+body.theme-dark .link { color: #818cf8; }
+body.theme-dark .link:hover { color: #6366f1; }
 

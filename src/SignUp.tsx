@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type ChangeEvent, type FormEvent } from 'react';
 import './SignUp.css';
 
 interface SignUpFormData {
@@ -87,7 +87,7 @@ function SignUp({ onSwitchToLogin }: SignUpProps) {
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
         const { name, value, type, checked } = e.target;
         setFormData(prev => ({
             ...prev,
@@ -103,7 +103,7 @@ function SignUp({ onSwitchToLogin }: SignUpProps) {
         }
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
 
         if (!validateForm()) {
