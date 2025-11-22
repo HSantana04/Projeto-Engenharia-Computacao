@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">FinanSmartAI</string>
+    <string name="title_activity_main">FinanSmartAI</string>
+    <string name="package_name">com.finansmart.ai</string>
+    <string name="custom_url_scheme">com.finansmart.ai</string>
+</resources>

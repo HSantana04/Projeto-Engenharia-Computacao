@@ -1,7 +1,9 @@
-import { useState, type ChangeEvent, type FormEvent } from 'react';
+import { useState, useEffect, type ChangeEvent, type FormEvent } from 'react';
 import './Login.css';
 import { useAuth } from './contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from './config/supabaseClient';
+import userService from './services/userService';
 
 interface LoginFormData {
     email: string;
@@ -30,27 +32,28 @@ function Login({ onSwitchToSignUp, onSwitchToForgotPassword }: LoginProps) {
     const [errors, setErrors] = useState<LoginFormErrors>({});
     const [isLoading, setIsLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
-
-    // ✅ Usar AuthContext com Supabase
-    const { login } = useAuth();
     const navigate = useNavigate();
+
+    const { login } = useAuth();
+
+    // 🔥 Se já tiver sessão, já redireciona (protege rota /login)
+    useEffect(() => {
+        supabase.auth.getSession().then(({ data }) => {
+            if (data.session?.user) {
+                navigate('/dashboard');
+            }
+        });
+    }, []);
 
     const validateForm = (): boolean => {
         const newErrors: LoginFormErrors = {};
 
-        // Validação de email
-        if (!formData.email) {
-            newErrors.email = 'Email é obrigatório';
-        } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-            newErrors.email = 'Email inválido';
-        }
+        if (!formData.email) newErrors.email = 'Email é obrigatório';
+        else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Email inválido';
 
-        // Validação de senha
-        if (!formData.password) {
-            newErrors.password = 'Senha é obrigatória';
-        } else if (formData.password.length < 6) {
-            newErrors.password = 'Senha deve ter pelo menos 6 caracteres';
-        }
+        if (!formData.password) newErrors.password = 'Senha é obrigatória';
+        else if (formData.password.length < 6)
+            newErrors.password = 'A senha deve ter pelo menos 6 caracteres';
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -58,12 +61,12 @@ function Login({ onSwitchToSignUp, onSwitchToForgotPassword }: LoginProps) {
 
     const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
         const { name, value, type, checked } = e.target;
+
         setFormData(prev => ({
             ...prev,
             [name]: type === 'checkbox' ? checked : value
         }));
 
-        // Limpar erro do campo quando o usuário começa a digitar
         if (errors[name as keyof LoginFormErrors]) {
             setErrors(prev => ({
                 ...prev,
@@ -74,31 +77,54 @@ function Login({ onSwitchToSignUp, onSwitchToForgotPassword }: LoginProps) {
     };
 
     const handleSubmit = async (e: FormEvent) => {
-  e.preventDefault();
+        e.preventDefault();
 
-  if (!validateForm()) return;
+        if (!validateForm()) return;
 
-  setIsLoading(true);
-  setErrors({});
+        setIsLoading(true);
+        setErrors({});
 
-  try {
-    // Só chama o login do AuthContext
-    await login(formData.email, formData.password);
+        try {
+            // 1️⃣ Login no auth.users
+            const result = await login(formData.email, formData.password);
 
-    // ❌ Remove o navigate daqui
-    // O AuthProvider vai redirecionar automaticamente quando isAuthenticated mudar
-  } catch (error) {
-    console.error('Erro no login:', error);
-    setErrors({
-      general: error instanceof Error ? error.message : 'Email ou senha inválidos. Tente novamente.'
-    });
-  } finally {
-    setIsLoading(false);
-  }
-};
+            if (!result) {
+                throw new Error('Falha no login');
+            }
 
-    const handleForgotPassword = () => {
-        onSwitchToForgotPassword();
+            // 2️⃣ Busca o user na tabela public.users
+            // 2️⃣ Pega o usuário logado do Supabase
+const {
+    data: { user }
+} = await supabase.auth.getUser();
+
+if (!user?.id) {
+    throw new Error('Falha ao obter usuário autenticado');
+}
+
+// 3️⃣ Busca o usuário na tabela public.users pelo auth_id
+const userDb = await userService.getCurrentUser(user.id);
+
+if (!userDb) {
+    throw new Error('Usuário não encontrado na tabela users');
+}
+
+            if (!userDb) {
+                throw new Error('Usuário não encontrado na tabela users');
+            }
+
+            // 3️⃣ Redirect AQUI MESMO 🔥
+            navigate('/dashboard');
+
+        } catch (error: any) {
+            console.error('Erro no login:', error);
+
+            setErrors({
+                general: error.message || 'Email ou senha inválidos.'
+            });
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -110,7 +136,7 @@ function Login({ onSwitchToSignUp, onSwitchToForgotPassword }: LoginProps) {
                 </div>
 
                 <form onSubmit={handleSubmit} className="login-form">
-                    {/* ✅ Erro geral do Supabase */}
+
                     {errors.general && (
                         <div className="error-banner">
                             <span>⚠️ {errors.general}</span>
@@ -130,7 +156,9 @@ function Login({ onSwitchToSignUp, onSwitchToForgotPassword }: LoginProps) {
                             disabled={isLoading}
                             autoComplete="email"
                         />
-                        {errors.email && <span className="error-message">{errors.email}</span>}
+                        {errors.email && (
+                            <span className="error-message">{errors.email}</span>
+                        )}
                     </div>
 
                     <div className="form-group">
@@ -147,6 +175,7 @@ function Login({ onSwitchToSignUp, onSwitchToForgotPassword }: LoginProps) {
                                 disabled={isLoading}
                                 autoComplete="current-password"
                             />
+
                             <button
                                 type="button"
                                 className="password-toggle"
@@ -157,7 +186,10 @@ function Login({ onSwitchToSignUp, onSwitchToForgotPassword }: LoginProps) {
                                 {showPassword ? '👁️' : '👁️‍🗨️'}
                             </button>
                         </div>
-                        {errors.password && <span className="error-message">{errors.password}</span>}
+
+                        {errors.password && (
+                            <span className="error-message">{errors.password}</span>
+                        )}
                     </div>
 
                     <div className="form-options">
@@ -176,7 +208,7 @@ function Login({ onSwitchToSignUp, onSwitchToForgotPassword }: LoginProps) {
                         <button
                             type="button"
                             className="forgot-password"
-                            onClick={handleForgotPassword}
+                            onClick={onSwitchToForgotPassword}
                             disabled={isLoading}
                         >
                             Esqueci minha senha
