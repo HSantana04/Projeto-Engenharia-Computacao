@@ -1,0 +1,66 @@
+/* Auth Container Styles */
+.auth-container {
+    width: 100vw;
+    min-height: 100vh;
+    position: relative;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+/* Transição suave entre componentes */
+.auth-container>* {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Responsive Design - Breakpoints aprimorados */
+/* Tablets pequenos e dispositivos móveis grandes */
+@media (max-width: 768px) {
+    .auth-container {
+        width: 100%;
+        min-height: 100vh;
+    }
+}
+
+/* Dispositivos móveis médios */
+@media (max-width: 600px) {
+    .auth-container {
+        width: 100%;
+        min-height: 100vh;
+    }
+}
+
+/* Dispositivos móveis pequenos */
+@media (max-width: 480px) {
+    .auth-container {
+        width: 100%;
+        min-height: 100vh;
+    }
+}
+
+/* Orientação paisagem em dispositivos móveis */
+@media (max-height: 600px) and (orientation: landscape) {
+    .auth-container {
+        min-height: 100vh;
+    }
+}
+
+/* Dispositivos de alta resolução */
+@media (min-width: 1200px) {
+    .auth-container {
+        width: 100vw;
+        min-height: 100vh;
+    }
+}
