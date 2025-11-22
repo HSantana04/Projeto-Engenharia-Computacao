@@ -3,7 +3,6 @@ import './Login.css';
 import { useAuth } from './contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from './config/supabaseClient';
-import userService from './services/userService';
 
 interface LoginFormData {
     email: string;
@@ -76,57 +75,33 @@ function Login({ onSwitchToSignUp, onSwitchToForgotPassword }: LoginProps) {
         }
     };
 
-    const handleSubmit = async (e: FormEvent) => {
-        e.preventDefault();
+const handleSubmit = async (e: FormEvent) => {
+  e.preventDefault();
 
-        if (!validateForm()) return;
+  if (!validateForm()) return;
 
-        setIsLoading(true);
-        setErrors({});
+  setIsLoading(true);
+  setErrors({});
 
-        try {
-            // 1️⃣ Login no auth.users
-            const result = await login(formData.email, formData.password);
+  try {
+    const loginSuccess = await login(formData.email, formData.password);
 
-            if (!result) {
-                throw new Error('Falha no login');
-            }
+    if (!loginSuccess) {
+      throw new Error('Falha no login');
+    }
 
-            // 2️⃣ Busca o user na tabela public.users
-            // 2️⃣ Pega o usuário logado do Supabase
-const {
-    data: { user }
-} = await supabase.auth.getUser();
+    navigate('/dashboard');
 
-if (!user?.id) {
-    throw new Error('Falha ao obter usuário autenticado');
-}
+  } catch (error: any) {
+    console.error('Erro no login:', error);
 
-// 3️⃣ Busca o usuário na tabela public.users pelo auth_id
-const userDb = await userService.getCurrentUser(user.id);
-
-if (!userDb) {
-    throw new Error('Usuário não encontrado na tabela users');
-}
-
-            if (!userDb) {
-                throw new Error('Usuário não encontrado na tabela users');
-            }
-
-            // 3️⃣ Redirect AQUI MESMO 🔥
-            navigate('/dashboard');
-
-        } catch (error: any) {
-            console.error('Erro no login:', error);
-
-            setErrors({
-                general: error.message || 'Email ou senha inválidos.'
-            });
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
+    setErrors({
+      general: error.message || 'Email ou senha inválidos.'
+    });
+  } finally {
+    setIsLoading(false);
+  }
+};
     return (
         <div className="login-container">
             <div className="login-card">

@@ -1,3 +1,4 @@
+// src/contexts/AuthContext.tsx
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '../config/supabaseClient';
 import userService from '../services/userService';
@@ -11,7 +12,7 @@ interface AuthContextType {
     name: string;
     auth_id: string;
   } | null;
-  login: (email: string, password: string) => Promise<any>;
+  login: (email: string, password: string) => Promise<boolean>;
   signup: (email: string, password: string, name: string) => Promise<void>;
   logout: () => Promise<void>;
   updateProfile: (name: string, bio?: string) => Promise<void>;
@@ -30,7 +31,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsLoading(true);
       try {
         const { data: { session } } = await supabase.auth.getSession();
-
         if (session?.user) {
           const userData = await userService.getCurrentUser(session.user.id);
           if (userData) {
@@ -49,17 +49,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     loadSession();
   }, []);
 
-  const login = async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) throw error;
-    return data; // A LoginPage faz o redirect
-  };
+  const login = async (email: string, password: string): Promise<boolean> => {
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
 
+  if (error) throw error;
+
+  if (data.user) {
+    const userData = await userService.getCurrentUser(data.user.id);
+    if (userData) {
+      setUser(userData);
+      setIsAuthenticated(true);
+      return true;
+    }
+  }
+  
+  return false;
+};
   const signup = async (email: string, password: string, name: string) => {
-    const { data, error } = await supabase.auth.signUp({ email, password });
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+
     if (error) throw error;
+
     if (data.user) {
       await userService.createUser(data.user.id, email, name);
+      const userData = await userService.getCurrentUser(data.user.id);
+      if (userData) {
+        setUser(userData);
+        setIsAuthenticated(true);
+      }
     }
   };
 
@@ -71,8 +94,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const updateProfile = async (name: string, bio?: string) => {
     if (!user) throw new Error("No user logged in");
-    const updated = await userService.updateUserProfile(user.id, { name, email: user.email, bio });
-    if (updated) setUser({ ...user, name: updated.name });
+
+    const updated = await userService.updateUserProfile(user.id, {
+      name,
+      email: user.email,
+      bio,
+    });
+
+    if (updated) {
+      setUser({ ...user, name: updated.name });
+    }
   };
 
   return (
@@ -84,7 +115,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         login,
         signup,
         logout,
-        updateProfile
+        updateProfile,
       }}
     >
       {children}

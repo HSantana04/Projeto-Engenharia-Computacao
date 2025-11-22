@@ -1,4 +1,5 @@
 import { jsx as _jsx } from "react/jsx-runtime";
+// src/contexts/AuthContext.tsx
 import { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '../config/supabaseClient';
 import userService from '../services/userService';
@@ -32,17 +33,36 @@ export const AuthProvider = ({ children }) => {
         loadSession();
     }, []);
     const login = async (email, password) => {
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+        });
         if (error)
             throw error;
-        return data; // A LoginPage faz o redirect
+        if (data.user) {
+            const userData = await userService.getCurrentUser(data.user.id);
+            if (userData) {
+                setUser(userData);
+                setIsAuthenticated(true);
+                return true;
+            }
+        }
+        return false;
     };
     const signup = async (email, password, name) => {
-        const { data, error } = await supabase.auth.signUp({ email, password });
+        const { data, error } = await supabase.auth.signUp({
+            email,
+            password,
+        });
         if (error)
             throw error;
         if (data.user) {
             await userService.createUser(data.user.id, email, name);
+            const userData = await userService.getCurrentUser(data.user.id);
+            if (userData) {
+                setUser(userData);
+                setIsAuthenticated(true);
+            }
         }
     };
     const logout = async () => {
@@ -53,9 +73,14 @@ export const AuthProvider = ({ children }) => {
     const updateProfile = async (name, bio) => {
         if (!user)
             throw new Error("No user logged in");
-        const updated = await userService.updateUserProfile(user.id, { name, email: user.email, bio });
-        if (updated)
+        const updated = await userService.updateUserProfile(user.id, {
+            name,
+            email: user.email,
+            bio,
+        });
+        if (updated) {
             setUser({ ...user, name: updated.name });
+        }
     };
     return (_jsx(AuthContext.Provider, { value: {
             isAuthenticated,
@@ -64,7 +89,7 @@ export const AuthProvider = ({ children }) => {
             login,
             signup,
             logout,
-            updateProfile
+            updateProfile,
         }, children: children }));
 };
 export const useAuth = () => {

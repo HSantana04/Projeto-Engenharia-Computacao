@@ -130,10 +130,13 @@ function Transactions() {
         ) : (
           <>
             <TransactionTable
-              transactions={transactions}
-              onEditTransaction={openEditModal}
-              onDeleteTransaction={openDeleteModal}
-            />
+  transactions={transactions}
+  onEditTransaction={openEditModal}
+  onDeleteTransaction={openDeleteModal}
+  sortBy="date"
+  sortOrder="desc"
+  onToggleSort={() => {}}
+/>
             <TransactionSummary summary={summary} filteredCount={transactions.length} totalCount={transactions.length} />
           </>
         )}

@@ -1,4 +1,4 @@
-// userService.ts
+// src/services/userService.ts
 import { supabase } from '../config/supabaseClient';
 const getCurrentUser = async (auth_id) => {
     const { data, error } = await supabase
@@ -24,4 +24,17 @@ const createUser = async (auth_id, email, name) => {
     }
     return data;
 };
-export default { getCurrentUser, createUser };
+const updateUserProfile = async (userId, updates) => {
+    const { data, error } = await supabase
+        .from('users')
+        .update(updates)
+        .eq('id', userId)
+        .select()
+        .single();
+    if (error) {
+        console.error('[userService] updateUserProfile error:', error.message);
+        return null;
+    }
+    return data;
+};
+export default { getCurrentUser, createUser, updateUserProfile };

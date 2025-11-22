@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import './Profile.css';
 
 interface UserProfile {
@@ -6,7 +6,7 @@ interface UserProfile {
     email: string;
     bio?: string;
 }
-
+const [loading, setLoading] = useState(false);
 const Profile: React.FC = () => {
     const [user, setUser] = useState<UserProfile>({
         name: "João Silva",
@@ -14,7 +14,6 @@ const Profile: React.FC = () => {
         bio: "Desenvolvedor apaixonado por tecnologia e finanças.",
     });
 
-    const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {

@@ -1,4 +1,4 @@
-import { type FilterCategory, type FilterSubcategory, type SortField } from './types/index';
+import { type FilterCategory, type FilterSubcategory } from './types/index';
 
 interface TransactionFiltersProps {
   searchTerm: string;
@@ -6,12 +6,9 @@ interface TransactionFiltersProps {
   selectedSubcategory: FilterSubcategory;
   categories: FilterCategory[];
   subcategories: FilterSubcategory[];
-  sortBy: SortField;
-  sortOrder: 'asc' | 'desc';
   onSearchChange: (searchTerm: string) => void;
   onCategoryChange: (category: FilterCategory) => void;
   onSubcategoryChange: (subcategory: FilterSubcategory) => void;
-  onToggleSort: (column: SortField) => void;
 }
 
 export const TransactionFilters = ({
@@ -20,12 +17,9 @@ export const TransactionFilters = ({
   selectedSubcategory,
   categories,
   subcategories,
-  sortBy,
-  sortOrder,
   onSearchChange,
   onCategoryChange,
-  onSubcategoryChange,
-  onToggleSort
+  onSubcategoryChange
 }: TransactionFiltersProps) => {
   return (
     <div className="filters">

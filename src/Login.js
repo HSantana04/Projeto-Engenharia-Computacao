@@ -4,7 +4,6 @@ import './Login.css';
 import { useAuth } from './contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from './config/supabaseClient';
-import userService from './services/userService';
 function Login({ onSwitchToSignUp, onSwitchToForgotPassword }) {
     const [formData, setFormData] = useState({
         email: '',
@@ -58,26 +57,10 @@ function Login({ onSwitchToSignUp, onSwitchToForgotPassword }) {
         setIsLoading(true);
         setErrors({});
         try {
-            // 1️⃣ Login no auth.users
-            const result = await login(formData.email, formData.password);
-            if (!result) {
+            const loginSuccess = await login(formData.email, formData.password);
+            if (!loginSuccess) {
                 throw new Error('Falha no login');
             }
-            // 2️⃣ Busca o user na tabela public.users
-            // 2️⃣ Pega o usuário logado do Supabase
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user?.id) {
-                throw new Error('Falha ao obter usuário autenticado');
-            }
-            // 3️⃣ Busca o usuário na tabela public.users pelo auth_id
-            const userDb = await userService.getCurrentUser(user.id);
-            if (!userDb) {
-                throw new Error('Usuário não encontrado na tabela users');
-            }
-            if (!userDb) {
-                throw new Error('Usuário não encontrado na tabela users');
-            }
-            // 3️⃣ Redirect AQUI MESMO 🔥
             navigate('/dashboard');
         }
         catch (error) {
