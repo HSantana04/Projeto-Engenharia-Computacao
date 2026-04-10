@@ -108,8 +108,8 @@ export const Dashboard = () => {
     <div className="space-y-8">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Portfolio Dashboard</h1>
-          <p className="mt-1 text-sm text-gray-600">Consolidated view of all client portfolios</p>
+          <h1 className="text-3xl font-bold text-gray-900">FinansmartAI Dashboard</h1>
+          <p className="mt-1 text-sm text-gray-600">Visão consolidada de todos os portfólios</p>
         </div>
         <Button onClick={handleGenerateSample} disabled={generating}>
           {generating ? 'Generating...' : 'Generate Sample Portfolio'}

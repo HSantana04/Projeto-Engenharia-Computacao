@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
 import { BarChart3, Upload, Users, ArrowRight, Shield, Zap, ChevronRight } from 'lucide-react';
-import logoUrl from '../assets/Logoportfelofc.png';
 
 const features = [
   {
@@ -36,8 +35,7 @@ export const LandingPage = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-2">
-              <img src={logoUrl} alt="Consultoria Portfel" className="h-8 w-auto" />
-              <span className="text-xl font-bold text-gray-900 tracking-tight">Consultoria Portfel</span>
+              <span className="text-xl font-bold text-black tracking-tight">FinansmartAI</span>
             </div>
 
             <div className="hidden md:flex items-center gap-8">
@@ -69,8 +67,7 @@ export const LandingPage = () => {
       <section className="relative z-10 pt-20 pb-32 sm:pt-28 sm:pb-40">
         <div className="max-w-4xl mx-auto px-4 text-center">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-blue-50 rounded-full text-sm font-medium text-blue-700 mb-8">
-            <img src={logoUrl} alt="Consultoria Portfel" className="h-4 w-auto" />
-            Consultoria Portfel
+            FinansmartAI
           </div>
 
           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-gray-900 tracking-tight leading-[1.1]">
@@ -203,7 +200,7 @@ export const LandingPage = () => {
             Pronto para transformar sua consultoria?
           </h2>
           <p className="mt-4 text-lg text-gray-500 max-w-xl mx-auto">
-            Comece gratuitamente e descubra como o Portfolio Hub pode elevar sua gestão de investimentos.
+            Comece gratuitamente e descubra como o FinansmartAI pode elevar sua gestão de investimentos.
           </p>
           <div className="mt-8">
             <Link
@@ -222,11 +219,10 @@ export const LandingPage = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
-              <img src={logoUrl} alt="Consultoria Portfel" className="h-6 w-auto" />
-              <span className="text-sm font-semibold text-gray-900">Consultoria Portfel</span>
+              <span className="text-sm font-semibold text-gray-900">FinansmartAI</span>
             </div>
             <p className="text-sm text-gray-400">
-              © {new Date().getFullYear()} Consultoria Portfel. Todos os direitos reservados.
+              © {new Date().getFullYear()} FinansmartAI. Todos os direitos reservados.
             </p>
           </div>
         </div>

@@ -92,8 +92,8 @@ export const LoginPage = () => {
           {/* Logo */}
           <div className="text-center mb-8">
             <div className="inline-flex items-center gap-2 mb-4">
-              <img src={logoUrl} alt="Consultoria Portfel" className="h-10 w-auto" />
-              <span className="text-2xl font-bold text-gray-900 tracking-tight">Consultoria Portfel</span>
+              <img src={logoUrl} alt="Consultoria FinansmartAI" className="h-10 w-auto" />
+              <span className="text-2xl font-bold text-gray-900 tracking-tight">Consultoria FinansmartAI</span>
             </div>
             <p className="text-gray-500">Acesse sua conta para continuar</p>
           </div>

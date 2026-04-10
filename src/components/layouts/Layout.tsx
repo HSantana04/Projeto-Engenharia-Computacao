@@ -104,9 +104,9 @@ export const Layout = ({ children }: LayoutProps) => {
     <div className="min-h-screen bg-slate-50/50 flex flex-col md:flex-row font-sans">
       <aside className="hidden md:flex flex-col w-64 glass-card border-r border-white/60 m-4 p-4 sticky top-4 h-[calc(100vh-2rem)] z-20">
         <div className="flex items-center gap-3 px-2 mb-10 mt-2">
-          <img src={logoUrl} alt="Consultoria Portfel" className="h-8 w-auto" />
+          <img src={logoUrl} alt="Consultoria FinansmartAI" className="h-8 w-auto" />
           <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-indigo-700">
-            Portfel
+            FinansmartAI
           </span>
         </div>
 
@@ -158,8 +158,8 @@ export const Layout = ({ children }: LayoutProps) => {
 
       <div className="md:hidden flex items-center justify-between p-4 bg-white border-b border-slate-200 z-30 sticky top-0">
         <div className="flex items-center gap-2">
-          <img src={logoUrl} alt="Consultoria Portfel" className="h-7 w-auto" />
-          <span className="text-lg font-bold text-slate-900">Portfel</span>
+          <img src={logoUrl} alt="Consultoria FinansmartAI" className="h-7 w-auto" />
+          <span className="text-lg font-bold text-slate-900">FinansmartAI</span>
         </div>
         <button
           type="button"

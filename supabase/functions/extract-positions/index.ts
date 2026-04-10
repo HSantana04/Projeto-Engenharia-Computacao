@@ -28,26 +28,40 @@ Deno.serve(async (req) => {
       );
     }
 
-    const prompt = `Você é um assistente financeiro especialista em extrair dados de extratos bancários brasileiros e notas de corretagem.
-            O usuário fornecerá o texto extraído de um arquivo PDF.
-            Você deve retornar ESTRITAMENTE um objeto JSON no seguinte formato exato:
-Para cada posição, extraia:
-- asset_name: Nome do ativo (ex: "CDB Banco XP 120% CDI", "PETR4", "Tesouro IPCA+ 2035", "FII HGLG11")
-- institution: Nome da instituição financeira (ex: "XP Investimentos", "BTG Pactual", "Nu Invest")
-- amount: Valor monetário total em BRL (apenas número, sem símbolo de moeda)
-- quantity: Número de unidades/cotas (apenas número, use 0 se não aplicável)
-- asset_type: Um dos tipos: "Ação", "FII", "ETF", "CDB", "LCI", "LCA", "Debênture", "Tesouro Direto", "Fundo", "COE", "Poupança", "Outro"
+    const systemPrompt = `Você é um assistente financeiro especialista em extrair dados de extratos bancários brasileiros e notas de corretagem.
+Sua tarefa é analisar o texto do extrato e extrair DUAS listas independentes (quando existirem):
+1. POSIÇÕES DE INVESTIMENTOS (saldo em conta corrente, ações, fundos, CDBs, etc).
+2. TRANSAÇÕES FINANCEIRAS (receitas e despesas do histórico da conta, PIX, pagamentos, etc).
 
-Retorne APENAS um array JSON válido. Exemplo:
-[
-  {"asset_name": "PETR4", "institution": "XP Investimentos", "amount": 15000.50, "quantity": 500, "asset_type": "Ação"},
-  {"asset_name": "CDB 120% CDI", "institution": "BTG Pactual", "amount": 50000, "quantity": 1, "asset_type": "CDB"}
-]
+IMPORTANTE: É muito comum extratos terem apenas transações e NENHUM investimento. Nesse caso, extraia todas as transações e retorne "positions": []. Se houver apenas investimentos, retorne "transactions": []. NUNCA retorne vazio se houver transações no texto!
 
-Se não conseguir extrair nenhuma posição, retorne um array vazio: []
+Você DEVE retornar a resposta EXATAMENTE no formato JSON abaixo:
+{
+  "positions": [
+    {
+      "asset_name": "Nome do ativo",
+      "institution": "Nome da instituição",
+      "asset_type": "Tipo do ativo",
+      "amount": 1500.50,
+      "quantity": 10
+    }
+  ],
+  "transactions": [
+    {
+      "description": "Descrição do lançamento",
+      "amount": 150.00,
+      "type": "receita",
+      "category": "Categoria sugerida",
+      "date": "YYYY-MM-DD"
+    }
+  ]
+}
 
-Texto do extrato:
-${text.substring(0, 15000)}`;
+Regras OBRIGATÓRIAS:
+- O campo "type" das transações DEVE ser ESTRITAMENTE a string "receita" para entradas de dinheiro ou "despesa" para saídas.
+- O campo "amount" DEVE ser sempre um número (float) positivo.
+- Analise cuidadosamente o texto e capture TODAS as transações de conta corrente identificadas.
+- Retorne APENAS o JSON puro.`;
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -57,14 +71,15 @@ ${text.substring(0, 15000)}`;
       },
       body: JSON.stringify({
         model: 'gpt-4o-mini',
+        response_format: { type: "json_object" },
         messages: [
           {
             role: 'system',
-            content: 'Você é um parser preciso de documentos financeiros brasileiros. Sempre retorne arrays JSON válidos.',
+            content: systemPrompt,
           },
-          { role: 'user', content: prompt },
+          { role: 'user', content: `Extraia as posições e transações do texto do extrato abaixo:\n\n${text.substring(0, 15000)}` },
         ],
-        temperature: 0.1,
+        temperature: 0.0,
         max_tokens: 4000,
       }),
     });
@@ -78,18 +93,22 @@ ${text.substring(0, 15000)}`;
     }
 
     const data = await response.json();
-    const content = data.choices?.[0]?.message?.content?.trim() || '[]';
+    const content = data.choices?.[0]?.message?.content?.trim() || '{}';
 
-    let positions;
+    let result;
     try {
-      const jsonStr = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-      positions = JSON.parse(jsonStr);
-    } catch {
-      positions = [];
+      const jsonStr = content.replace(/```(?:json)?\n?/gi, '').replace(/```/g, '').trim();
+      result = JSON.parse(jsonStr);
+    } catch (parseError) {
+      console.error('Falha no JSON parse. Retorno da OpenAI:', content, parseError);
+      return new Response(
+        JSON.stringify({ error: 'O modelo da IA retornou um JSON inválido. Verifique os logs do Supabase.' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     return new Response(
-      JSON.stringify({ positions }),
+      JSON.stringify(result),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {

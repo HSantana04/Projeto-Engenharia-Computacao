@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, LineChart, Line, XAxis, YAxis, CartesianGrid, Legend } from 'recharts';
 import { Target, TrendingUp, Wallet, ArrowDownCircle, ArrowUpCircle, Plus, X, Pencil, Trash2, Save } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import type { Database } from '../types/database.types';
@@ -212,10 +212,30 @@ export const ClientDashboard = () => {
   const totalDespesas = transactions.filter(t => t.type === 'despesa').reduce((sum, t) => sum + Number(t.amount), 0);
   const saldoTransactions = totalReceitas - totalDespesas;
 
-  const transactionsChartData = [
-    { name: 'Receitas', valor: totalReceitas, fill: '#10B981' },
-    { name: 'Despesas', valor: totalDespesas, fill: '#EF4444' }
-  ];
+  const monthlyDataMap = transactions.reduce((acc, t) => {
+    if (!t.date) return acc;
+    const monthKey = t.date.substring(0, 7); // Extrai "YYYY-MM"
+    if (!acc[monthKey]) {
+      acc[monthKey] = { name: monthKey, Receitas: 0, Despesas: 0, Saldo: 0 };
+    }
+    if (t.type === 'receita') {
+      acc[monthKey].Receitas += Number(t.amount);
+    } else if (t.type === 'despesa') {
+      acc[monthKey].Despesas += Number(t.amount);
+    }
+    return acc;
+  }, {} as Record<string, { name: string; Receitas: number; Despesas: number; Saldo: number }>);
+
+  const monthlyData = Object.values(monthlyDataMap)
+    .sort((a, b) => a.name.localeCompare(b.name)) // Ordena cronologicamente
+    .map((item) => {
+      const [year, month] = item.name.split('-');
+      return {
+        ...item,
+        name: `${month}/${year.slice(2)}`, // Formata para "MM/YY"
+        Saldo: item.Receitas - item.Despesas,
+      };
+    });
 
   return (
     <div className="space-y-8 pb-8">
@@ -324,21 +344,20 @@ export const ClientDashboard = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <Card>
           <CardHeader>
-            <CardTitle>Resumo de Receitas e Despesas</CardTitle>
+            <CardTitle>Evolução Mensal (Receitas, Despesas e Saldo)</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={280}>
-              <BarChart data={transactionsChartData} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+              <LineChart data={monthlyData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis type="number" />
-                <YAxis dataKey="name" type="category" />
+                <XAxis dataKey="name" />
+                <YAxis />
                 <Tooltip formatter={(value) => formatCurrency(Number(value))} />
-                <Bar dataKey="valor" radius={[0, 4, 4, 0]}>
-                  {transactionsChartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.fill} />
-                  ))}
-                </Bar>
-              </BarChart>
+                <Legend />
+                <Line type="monotone" dataKey="Receitas" stroke="#10B981" strokeWidth={2} name="Receitas" />
+                <Line type="monotone" dataKey="Despesas" stroke="#EF4444" strokeWidth={2} name="Despesas" />
+                <Line type="monotone" dataKey="Saldo" stroke="#3B82F6" strokeWidth={2} name="Saldo (Investível)" />
+              </LineChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>

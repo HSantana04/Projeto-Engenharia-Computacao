@@ -1,4 +1,4 @@
-# Hackathon 2026 - Desafio Portfel
+# Hackathon 2026 - Desafio FinansmartAI
 
 Plataforma web para consultores de investimentos consolidarem e gerenciarem portfólios de clientes. Com extração automática de posições via IA a partir de extratos em PDF.
 

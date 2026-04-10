@@ -1,33 +1,37 @@
+// src/services/aiExtractor.ts
 import { supabase } from '../lib/supabase';
 
 export interface ExtractedPosition {
   asset_name: string;
   institution: string;
+  asset_type: string;
   amount: number;
   quantity: number;
-  asset_type: string;
 }
 
-export async function extractPositionsWithAI(text: string): Promise<ExtractedPosition[]> {
+export interface ExtractedTransaction {
+  description: string;
+  amount: number;
+  type: 'receita' | 'despesa';
+  category: string;
+  date: string;
+}
+
+export interface ExtractionResult {
+  positions: ExtractedPosition[];
+  transactions: ExtractedTransaction[];
+}
+
+export const extractPositionsWithAI = async (text: string): Promise<ExtractionResult> => {
   const { data, error } = await supabase.functions.invoke('extract-positions', {
     body: { text },
   });
 
   if (error) {
-    throw new Error(`Erro na extração com IA: ${error.message}`);
+    throw new Error(error.message || 'Erro ao comunicar com a IA');
   }
 
-  if (!data?.positions || !Array.isArray(data.positions)) {
-    return [];
-  }
-
-  return data.positions
-    .filter((p: Record<string, unknown>) => p.asset_name && p.asset_type)
-    .map((p: Record<string, unknown>) => ({
-      asset_name: String(p.asset_name),
-      institution: String(p.institution || 'Não identificada'),
-      amount: Number(p.amount) || 0,
-      quantity: Number(p.quantity) || 0,
-      asset_type: String(p.asset_type),
-    }));
-}
+  // Retorna o objeto completo contendo { positions, transactions }
+  // Isso evita que as transações sejam perdidas no caminho!
+  return data;
+};

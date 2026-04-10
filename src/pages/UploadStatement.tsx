@@ -88,23 +88,18 @@ export const UploadStatement = () => {
     setError(null);
     try {
       const text = await extractTextFromPdf(pdfFile);
+      console.log('Texto extraído do PDF (primeiros 500 caracteres):', text.substring(0, 500));
       if (!text.trim()) {
         throw new Error('Não foi possível extrair texto do PDF. Verifique se o arquivo não está protegido ou é uma imagem.');
       }
       const extracted: any = await extractPositionsWithAI(text);
-      if (Array.isArray(extracted)) {
-        if (extracted.length === 0) {
-          throw new Error('Nenhuma posição de investimento ou transação foi identificada.');
-        }
-        setPositions(extracted);
-        setTransactions([]);
-      } else {
-        if (!extracted?.positions?.length && !extracted?.transactions?.length) {
-          throw new Error('Nenhuma posição de investimento ou transação foi identificada.');
-        }
-        setPositions(extracted.positions || []);
-        setTransactions(extracted.transactions || []);
+      console.log('JSON retornado pela IA:', extracted);
+      
+      if (!extracted?.positions?.length && !extracted?.transactions?.length) {
+        throw new Error(`Nenhum dado encontrado. A IA retornou: ${JSON.stringify(extracted)}`);
       }
+      setPositions(extracted.positions || []);
+      setTransactions(extracted.transactions || []);
       setStep('preview');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao extrair posições do PDF');
@@ -162,11 +157,13 @@ export const UploadStatement = () => {
         confirmed: false,
       }));
 
-      const { error: extractError } = await supabase
-        .from('extracted_positions')
-        .insert(extractedPositions);
+      if (extractedPositions.length > 0) {
+        const { error: extractError } = await supabase
+          .from('extracted_positions')
+          .insert(extractedPositions);
 
-      if (extractError) throw extractError;
+        if (extractError) throw extractError;
+      }
 
       const extractedTransactions = transactions.map(tx => ({
         document_id: documentId,
