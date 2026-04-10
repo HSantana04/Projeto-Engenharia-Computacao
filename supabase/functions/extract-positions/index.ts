@@ -28,8 +28,9 @@ Deno.serve(async (req) => {
       );
     }
 
-    const prompt = `Você é um parser de documentos financeiros brasileiros. Extraia todas as posições de investimento do texto de extrato bancário/corretora abaixo.
-
+    const prompt = `Você é um assistente financeiro especialista em extrair dados de extratos bancários brasileiros e notas de corretagem.
+            O usuário fornecerá o texto extraído de um arquivo PDF.
+            Você deve retornar ESTRITAMENTE um objeto JSON no seguinte formato exato:
 Para cada posição, extraia:
 - asset_name: Nome do ativo (ex: "CDB Banco XP 120% CDI", "PETR4", "Tesouro IPCA+ 2035", "FII HGLG11")
 - institution: Nome da instituição financeira (ex: "XP Investimentos", "BTG Pactual", "Nu Invest")
