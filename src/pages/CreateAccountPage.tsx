@@ -83,7 +83,11 @@ export const CreateAccountPage = () => {
       });
 
       if (signUpError) {
-        setError(signUpError.message);
+        if (signUpError.message.toLowerCase().includes('already registered')) {
+          setError('Este e-mail já possui um registro de login. Faça login ou exclua no painel de Autenticação.');
+        } else {
+          setError(signUpError.message);
+        }
         return;
       }
 
@@ -103,7 +107,11 @@ export const CreateAccountPage = () => {
         });
 
         if (insertError) {
-          setError(insertError.message);
+          if (insertError.message.includes('unique') || insertError.code === '23505') {
+            setError('Este CPF já está cadastrado.');
+          } else {
+            setError(`Erro ao criar perfil: ${insertError.message}`);
+          }
           return;
         }
       } else {
@@ -117,7 +125,11 @@ export const CreateAccountPage = () => {
         });
 
         if (insertError) {
-          setError(insertError.message);
+          if (insertError.message.includes('unique') || insertError.code === '23505') {
+            setError('Este CPF já está cadastrado em outro cliente.');
+          } else {
+            setError(`Erro ao criar perfil: ${insertError.message}`);
+          }
           return;
         }
       }
