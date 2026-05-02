@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Mail, Calendar, ShieldAlert, Target } from 'lucide-react';
@@ -15,11 +16,13 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '.
 import { formatCurrency } from '../utils/formatCurrency';
 import { FgcAlert } from '../components/FgcAlert';
 import { FundCarousel } from '../components/FundCarousel';
+import { SchoolFundsPanel } from '../components/SchoolFundsPanel';
 
 interface Client {
   id: string;
   name: string;
   email: string;
+  classification?: string;
   created_at: string;
 }
 
@@ -119,6 +122,20 @@ export const ClientDetail = () => {
     return (
       <div className="text-center py-12">
         <p className="text-gray-500">Client not found</p>
+      </div>
+    );
+  }
+
+  if (client.classification === 'escola') {
+    return (
+      <div className="space-y-6">
+        <Button variant="ghost" onClick={() => navigate(role === 'cliente' ? '/client-dashboard' : '/clients')}>
+          <ArrowLeft className="h-4 w-4 mr-2" /> Voltar
+        </Button>
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-xl shadow-lg p-8 text-white">
+          <h1 className="text-3xl font-bold">{client.name}</h1>
+        </div>
+        <SchoolFundsPanel clientId={client.id} />
       </div>
     );
   }

@@ -54,7 +54,7 @@ export const AddClientModal = ({ isOpen, onClose, onSuccess, consultantCpf }: Ad
   const [loading, setLoading] = useState(false);
 
   // Manual form state
-  const [formData, setFormData] = useState({ name: '', email: '', cpf: '' });
+  const [formData, setFormData] = useState({ name: '', email: '', cpf: '', classification: 'gestao_financeira' as const });
 
   // CSV state
   const [csvRows, setCsvRows] = useState<CsvRow[]>([]);
@@ -64,7 +64,7 @@ export const AddClientModal = ({ isOpen, onClose, onSuccess, consultantCpf }: Ad
   if (!isOpen) return null;
 
   const resetAndClose = () => {
-    setFormData({ name: '', email: '', cpf: '' });
+    setFormData({ name: '', email: '', cpf: '', classification: 'gestao_financeira' });
     setCsvRows([]);
     setCsvFileName(null);
     setError(null);
@@ -86,9 +86,10 @@ export const AddClientModal = ({ isOpen, onClose, onSuccess, consultantCpf }: Ad
     }
 
     try {
-      const insertData: { name: string; email: string; cpf?: string; cpf_consultor?: string } = {
+      const insertData: { name: string; email: string; cpf?: string; cpf_consultor?: string; classification?: string } = {
         name: formData.name,
         email: formData.email,
+        classification: formData.classification,
       };
       if (cpfDigits) insertData.cpf = cpfDigits;
       if (consultantCpf) insertData.cpf_consultor = consultantCpf;
@@ -274,6 +275,17 @@ export const AddClientModal = ({ isOpen, onClose, onSuccess, consultantCpf }: Ad
                       maxLength={14}
                       className="w-full px-4 py-2 bg-slate-50 border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none rounded-xl transition-all sm:text-sm"
                     />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Classificação</label>
+                    <select
+                      value={formData.classification}
+                      onChange={e => setFormData({ ...formData, classification: e.target.value as 'gestao_financeira' | 'escola' })}
+                      className="w-full px-4 py-2 bg-slate-50 border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none rounded-xl transition-all sm:text-sm"
+                    >
+                      <option value="gestao_financeira">Gestão Financeira</option>
+                      <option value="escola">Escola</option>
+                    </select>
                   </div>
 
                   <div className="pt-4 flex gap-3">

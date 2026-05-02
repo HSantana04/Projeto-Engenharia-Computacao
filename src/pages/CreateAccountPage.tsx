@@ -21,6 +21,7 @@ function formatCpfForTyping(input: string) {
 export const CreateAccountPage = () => {
   const [accountType, setAccountType] = useState<AccountType>('consultor');
 
+  const [classification, setClassification] = useState<'gestao_financeira' | 'escola'>('gestao_financeira');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [cpf, setCpf] = useState('');
@@ -112,6 +113,7 @@ export const CreateAccountPage = () => {
           email,
           cpf: cpfDigits,
           cpf_consultor: cpfConsultorDigits,
+          classification,
         });
 
         if (insertError) {
@@ -188,6 +190,28 @@ export const CreateAccountPage = () => {
                   </button>
                 </div>
               </div>
+
+              {accountType === 'cliente' && (
+                <div className="space-y-2 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Classificação</label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setClassification('gestao_financeira')}
+                      className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all border ${classification === 'gestao_financeira' ? 'bg-blue-600 text-white border-blue-600' : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-white'}`}
+                    >
+                      Gestão Financeira
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setClassification('escola')}
+                      className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all border ${classification === 'escola' ? 'bg-blue-600 text-white border-blue-600' : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-white'}`}
+                    >
+                      Escola
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {/* Optional error */}
               {error && (

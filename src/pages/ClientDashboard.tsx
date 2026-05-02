@@ -10,6 +10,7 @@ import { Button } from '../components/ui/Button';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '../components/ui/Table';
 import { Input } from '../components/ui/Input';
 import { formatCurrency } from '../utils/formatCurrency';
+import { SchoolFundsPanel } from '../components/SchoolFundsPanel';
 
 type PositionRow = Database['public']['Tables']['positions']['Row'];
 
@@ -21,6 +22,7 @@ export const ClientDashboard = () => {
   const [positions, setPositions] = useState<PositionRow[]>([]);
   const [transactions, setTransactions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [classification, setClassification] = useState<'gestao_financeira' | 'escola'>('gestao_financeira');
 
   const [isTxModalOpen, setIsTxModalOpen] = useState(false);
   const [isPosModalOpen, setIsPosModalOpen] = useState(false);
@@ -41,6 +43,14 @@ export const ClientDashboard = () => {
     const load = async () => {
       setLoading(true);
       try {
+        const { data: clientData } = await supabase
+          .from('clients')
+          .select('classification')
+          .eq('id', clientProfile.id)
+          .single();
+        if (clientData) {
+          setClassification(clientData.classification as any);
+        }
         const { data } = await supabase
           .from('positions')
           .select('*')
@@ -238,6 +248,16 @@ export const ClientDashboard = () => {
     });
 
   return (
+    classification === 'escola' ? (
+      <div className="space-y-8 pb-8">
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl shadow-xl p-8 text-white">
+          <p className="text-blue-100 text-sm font-medium">Gestão Escolar</p>
+          <h1 className="text-3xl font-bold mt-1">Olá, {clientProfile.name.split(' ')[0]}</h1>
+        </div>
+        
+        <SchoolFundsPanel clientId={clientProfile.id} />
+      </div>
+    ) : (
     <div className="space-y-8 pb-8">
       <div className="bg-gradient-to-r from-emerald-600 to-teal-700 rounded-2xl shadow-xl p-8 text-white">
         <p className="text-emerald-100 text-sm font-medium">Meu patrimônio</p>
@@ -627,5 +647,6 @@ export const ClientDashboard = () => {
         </div>
       )}
     </div>
+    )
   );
 };
