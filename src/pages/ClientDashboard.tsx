@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, LineChart, Line, XAxis, YAxis, CartesianGrid, Legend } from 'recharts';
-import { Target, TrendingUp, Wallet, ArrowDownCircle, ArrowUpCircle, Plus, X, Pencil, Trash2, Save } from 'lucide-react';
+import { Target, TrendingUp, Wallet, ArrowDownCircle, ArrowUpCircle, Plus, X, Pencil, Trash2, Save, Zap } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import type { Database } from '../types/database.types';
 import { useAuthRole } from '../hooks/useAuthRole';
@@ -14,8 +14,57 @@ import { SchoolFundsPanel } from '../components/SchoolFundsPanel';
 
 type PositionRow = Database['public']['Tables']['positions']['Row'];
 
-const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#14B8A6', '#F97316'];
+// ========== REVOLUT DESIGN SYSTEM ==========
+const REVOLUT_COLORS = {
+  primary: '#494fdf',
+  canvasDark: '#000000',
+  canvasLight: '#ffffff',
+  ink: '#191c1f',
+  body: '#1f2226',
+  onDark: '#ffffff',
+  onDarkMute: 'rgba(255,255,255,0.72)',
+  surfaceElevated: '#16181a',
+  surfaceSoft: '#f4f4f4',
+  hairlineLight: '#e2e2e7',
+  hairlineDark: 'rgba(255,255,255,0.12)',
+  accentTeal: '#00a87e',
+  accentBlue: '#007bc2',
+  accentPink: '#e61e49',
+  accentGreen: '#428619',
+  accentWarning: '#ec7e00',
+};
 
+const CHART_COLORS = [
+  REVOLUT_COLORS.accentBlue,
+  REVOLUT_COLORS.accentTeal,
+  REVOLUT_COLORS.accentPink,
+  REVOLUT_COLORS.accentGreen,
+  REVOLUT_COLORS.accentWarning,
+  REVOLUT_COLORS.primary,
+];
+
+// Revolut Button Component
+const RevolutButton = ({ children, variant = 'primary', size = 'md', ...props }: any) => {
+  const baseClasses = 'rounded-full font-medium transition-all duration-200 flex items-center justify-center gap-2';
+  const variants = {
+    primary: 'bg-white text-black hover:bg-slate-100',
+    dark: 'bg-black text-white hover:bg-slate-900 border border-white/10',
+    soft: 'bg-slate-100 text-black hover:bg-slate-200',
+    ghost: 'bg-transparent text-white hover:bg-white/10 border border-white/20',
+  };
+  const sizes = {
+    sm: 'px-4 py-2 text-sm',
+    md: 'px-7 py-3 text-base',
+    lg: 'px-8 py-4 text-lg',
+  };
+  return (
+    <button className={`${baseClasses} ${variants[variant]} ${sizes[size]}`} {...props}>
+      {children}
+    </button>
+  );
+};
+
+// ========== MAIN COMPONENT ==========
 export const ClientDashboard = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading, role, clientProfile } = useAuthRole();
@@ -86,21 +135,24 @@ export const ClientDashboard = () => {
 
   if (authLoading || loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" />
+      <div style={{ backgroundColor: REVOLUT_COLORS.canvasDark }} className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white" />
       </div>
     );
   }
 
   if (!clientProfile) {
     return (
-      <div className="text-center py-12 text-slate-600">
+      <div style={{ color: REVOLUT_COLORS.body }} className="text-center py-12">
         Não foi possível carregar seu perfil de cliente.
       </div>
     );
   }
 
   const totalValue = positions.reduce((sum, p) => sum + Number(p.amount), 0);
+  const totalReceitas = transactions.filter(t => t.type === 'receita').reduce((sum, t) => sum + Number(t.amount), 0);
+  const totalDespesas = transactions.filter(t => t.type === 'despesa').reduce((sum, t) => sum + Number(t.amount), 0);
+  const saldoTransactions = totalReceitas - totalDespesas;
 
   const assetTypeData = positions.reduce(
     (acc, p) => {
@@ -111,6 +163,31 @@ export const ClientDashboard = () => {
     },
     [] as { name: string; value: number }[]
   );
+
+  const monthlyDataMap = transactions.reduce((acc, t) => {
+    if (!t.date) return acc;
+    const monthKey = t.date.substring(0, 7);
+    if (!acc[monthKey]) {
+      acc[monthKey] = { name: monthKey, Receitas: 0, Despesas: 0, Saldo: 0 };
+    }
+    if (t.type === 'receita') {
+      acc[monthKey].Receitas += Number(t.amount);
+    } else if (t.type === 'despesa') {
+      acc[monthKey].Despesas += Number(t.amount);
+    }
+    return acc;
+  }, {} as Record<string, { name: string; Receitas: number; Despesas: number; Saldo: number }>);
+
+  const monthlyData = Object.values(monthlyDataMap)
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map((item) => {
+      const [year, month] = item.name.split('-');
+      return {
+        ...item,
+        name: `${month}/${year.slice(2)}`,
+        Saldo: item.Receitas - item.Despesas,
+      };
+    });
 
   const handleAddTransaction = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -128,8 +205,6 @@ export const ClientDashboard = () => {
       if (error) throw error;
       setIsTxModalOpen(false);
       setTxForm({ description: '', amount: '', type: 'receita', category: '', date: '' });
-      
-      // Recarregar os dados
       const { data } = await supabase
         .from('transactions')
         .select('*')
@@ -161,8 +236,6 @@ export const ClientDashboard = () => {
       if (error) throw error;
       setIsPosModalOpen(false);
       setPosForm({ asset_name: '', institution: '', asset_type: '', amount: '', quantity: '' });
-      
-      // Recarregar os dados
       const { data } = await supabase
         .from('positions')
         .select('*')
@@ -196,7 +269,6 @@ export const ClientDashboard = () => {
         })
         .eq('id', id);
       if (error) throw error;
-
       setTransactions(transactions.map(t => t.id === id ? { ...t, ...editTxValues } : t));
       setEditingTxId(null);
       setEditTxValues({});
@@ -218,435 +290,482 @@ export const ClientDashboard = () => {
     }
   };
 
-  const totalReceitas = transactions.filter(t => t.type === 'receita').reduce((sum, t) => sum + Number(t.amount), 0);
-  const totalDespesas = transactions.filter(t => t.type === 'despesa').reduce((sum, t) => sum + Number(t.amount), 0);
-  const saldoTransactions = totalReceitas - totalDespesas;
+  // ========== SCHOOL CLASSIFICATION ==========
+  if (classification === 'escola') {
+    return (
+      <div style={{ backgroundColor: REVOLUT_COLORS.canvasDark }}>
+        {/* Hero Band */}
+        <div style={{ backgroundColor: REVOLUT_COLORS.canvasDark }} className="pt-16 pb-24">
+          <div className="max-w-5xl mx-auto px-6 sm:px-8">
+            <p style={{ color: REVOLUT_COLORS.onDarkMute }} className="text-sm font-medium tracking-wide">GESTÃO ESCOLAR</p>
+            <h1 style={{ color: REVOLUT_COLORS.onDark, fontFamily: 'Aeonik Pro, sans-serif', fontSize: '80px', fontWeight: 500, letterSpacing: '-0.8px', lineHeight: 1.0 }} className="mt-4">
+              Olá,<br />{clientProfile.name.split(' ')[0]}
+            </h1>
+          </div>
+        </div>
 
-  const monthlyDataMap = transactions.reduce((acc, t) => {
-    if (!t.date) return acc;
-    const monthKey = t.date.substring(0, 7); // Extrai "YYYY-MM"
-    if (!acc[monthKey]) {
-      acc[monthKey] = { name: monthKey, Receitas: 0, Despesas: 0, Saldo: 0 };
-    }
-    if (t.type === 'receita') {
-      acc[monthKey].Receitas += Number(t.amount);
-    } else if (t.type === 'despesa') {
-      acc[monthKey].Despesas += Number(t.amount);
-    }
-    return acc;
-  }, {} as Record<string, { name: string; Receitas: number; Despesas: number; Saldo: number }>);
+        {/* Light Canvas */}
+        <div style={{ backgroundColor: REVOLUT_COLORS.canvasLight }} className="py-16">
+          <div className="max-w-5xl mx-auto px-6 sm:px-8">
+            <SchoolFundsPanel clientId={clientProfile.id} />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
-  const monthlyData = Object.values(monthlyDataMap)
-    .sort((a, b) => a.name.localeCompare(b.name)) // Ordena cronologicamente
-    .map((item) => {
-      const [year, month] = item.name.split('-');
-      return {
-        ...item,
-        name: `${month}/${year.slice(2)}`, // Formata para "MM/YY"
-        Saldo: item.Receitas - item.Despesas,
-      };
-    });
-
+  // ========== FINANCIAL CLASSIFICATION ==========
   return (
-    classification === 'escola' ? (
-      <div className="space-y-8 pb-8">
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl shadow-xl p-8 text-white">
-          <p className="text-blue-100 text-sm font-medium">Gestão Escolar</p>
-          <h1 className="text-3xl font-bold mt-1">Olá, {clientProfile.name.split(' ')[0]}</h1>
-        </div>
-        
-        <SchoolFundsPanel clientId={clientProfile.id} />
-      </div>
-    ) : (
-    <div className="space-y-8 pb-8">
-      <div className="bg-gradient-to-r from-emerald-600 to-teal-700 rounded-2xl shadow-xl p-8 text-white">
-        <p className="text-emerald-100 text-sm font-medium">Meu patrimônio</p>
-        <h1 className="text-3xl font-bold mt-1">Olá, {clientProfile.name.split(' ')[0]}</h1>
-        <div className="mt-6 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
-          <div>
-            <p className="text-sm text-emerald-100">Total investido</p>
-            <p className="text-4xl font-bold mt-1">{formatCurrency(totalValue)}</p>
-            <p className="text-xs text-emerald-200 mt-2">{positions.length} posição(ões) cadastrada(s)</p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Button
-              variant="secondary"
-              size="sm"
-              className="bg-white/15 hover:bg-white/25 text-white border-0"
-              onClick={() => navigate(`/client/${clientProfile.id}/goals`)}
-            >
-              <Target className="h-4 w-4 mr-2" />
-              Minhas metas
-            </Button>
-            <Button
-              variant="secondary"
-              size="sm"
-              className="bg-white/15 hover:bg-white/25 text-white border-0"
-              onClick={() => navigate(`/client/${clientProfile.id}`)}
-            >
-              <Wallet className="h-4 w-4 mr-2" />
-              Detalhes completos
-            </Button>
+    <div style={{ backgroundColor: REVOLUT_COLORS.canvasDark }}>
+      {/* ========== HERO BAND (DARK) ========== */}
+      <div style={{ backgroundColor: REVOLUT_COLORS.canvasDark }} className="pt-16 pb-24">
+        <div className="max-w-5xl mx-auto px-6 sm:px-8">
+          <p style={{ color: REVOLUT_COLORS.onDarkMute }} className="text-sm font-medium tracking-wide">MEU PATRIMÔNIO</p>
+          <h1 style={{ color: REVOLUT_COLORS.onDark, fontFamily: 'Aeonik Pro, sans-serif', fontSize: '80px', fontWeight: 500, letterSpacing: '-0.8px', lineHeight: 1.0 }} className="mt-4">
+            Olá,<br />{clientProfile.name.split(' ')[0]}
+          </h1>
+
+          <div className="mt-12 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-8">
+            <div>
+              <p style={{ color: REVOLUT_COLORS.onDarkMute }} className="text-sm font-medium">Total investido</p>
+              <p style={{ color: REVOLUT_COLORS.onDark, fontFamily: 'Aeonik Pro, sans-serif', fontSize: '48px', fontWeight: 500, letterSpacing: '-0.48px' }} className="mt-3">
+                {formatCurrency(totalValue)}
+              </p>
+              <p style={{ color: REVOLUT_COLORS.onDarkMute }} className="text-xs mt-2 font-medium tracking-wide">
+                {positions.length} POSIÇÃO{positions.length !== 1 ? 'ÕES' : ''} CADASTRADA{positions.length !== 1 ? 'S' : ''}
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <RevolutButton variant="primary" size="md" onClick={() => navigate(`/client/${clientProfile.id}/goals`)}>
+                <Target className="h-4 w-4" />
+                Metas
+              </RevolutButton>
+              <RevolutButton variant="ghost" size="md" onClick={() => navigate(`/client/${clientProfile.id}`)}>
+                <Wallet className="h-4 w-4" />
+                Detalhes
+              </RevolutButton>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Card>
-          <CardContent className="pt-6 flex items-center gap-4">
-            <div className="p-3 rounded-xl bg-blue-100">
-              <TrendingUp className="h-6 w-6 text-blue-600" />
+      {/* ========== KPI CARDS BAND (LIGHT) ========== */}
+      <div style={{ backgroundColor: REVOLUT_COLORS.canvasLight }} className="py-20">
+        <div className="max-w-5xl mx-auto px-6 sm:px-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {/* Patrimônio */}
+            <div style={{ backgroundColor: REVOLUT_COLORS.canvasLight, borderColor: REVOLUT_COLORS.hairlineLight }} className="rounded-lg border p-6 transition-all hover:shadow-sm">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p style={{ color: REVOLUT_COLORS.body }} className="text-sm font-medium">Patrimônio Total</p>
+                  <p style={{ color: REVOLUT_COLORS.ink, fontFamily: 'Aeonik Pro, sans-serif', fontSize: '32px', fontWeight: 500, letterSpacing: '-0.32px' }} className="mt-2">
+                    {formatCurrency(totalValue)}
+                  </p>
+                </div>
+                <div style={{ backgroundColor: REVOLUT_COLORS.primary }} className="rounded-full p-3">
+                  <TrendingUp style={{ color: REVOLUT_COLORS.onDark }} className="h-5 w-5" />
+                </div>
+              </div>
             </div>
-            <div>
-              <p className="text-sm text-slate-500">Patrimônio</p>
-              <p className="text-xl font-bold text-slate-900">{formatCurrency(totalValue)}</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6 flex items-center gap-4">
-            <div className="p-3 rounded-xl bg-violet-100">
-              <Wallet className="h-6 w-6 text-violet-600" />
-            </div>
-            <div>
-              <p className="text-sm text-slate-500">Posições</p>
-              <p className="text-xl font-bold text-slate-900">{positions.length}</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6 flex items-center gap-4">
-            <div className="p-3 rounded-xl bg-amber-100">
-              <Target className="h-6 w-6 text-amber-600" />
-            </div>
-            <div>
-              <p className="text-sm text-slate-500">Tipos de ativo</p>
-              <p className="text-xl font-bold text-slate-900">{assetTypeData.length}</p>
-            </div>
-          </CardContent>
-        </Card>
 
-        <Card>
-          <CardContent className="pt-6 flex items-center gap-4">
-            <div className="p-3 rounded-xl bg-emerald-100">
-              <ArrowUpCircle className="h-6 w-6 text-emerald-600" />
+            {/* Posições */}
+            <div style={{ backgroundColor: REVOLUT_COLORS.canvasLight, borderColor: REVOLUT_COLORS.hairlineLight }} className="rounded-lg border p-6 transition-all hover:shadow-sm">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p style={{ color: REVOLUT_COLORS.body }} className="text-sm font-medium">Posições Ativas</p>
+                  <p style={{ color: REVOLUT_COLORS.ink, fontFamily: 'Aeonik Pro, sans-serif', fontSize: '32px', fontWeight: 500, letterSpacing: '-0.32px' }} className="mt-2">
+                    {positions.length}
+                  </p>
+                </div>
+                <div style={{ backgroundColor: REVOLUT_COLORS.accentBlue }} className="rounded-full p-3">
+                  <Wallet style={{ color: '#fff' }} className="h-5 w-5" />
+                </div>
+              </div>
             </div>
-            <div>
-              <p className="text-sm text-slate-500">Receitas</p>
-              <p className="text-xl font-bold text-emerald-600">{formatCurrency(totalReceitas)}</p>
+
+            {/* Tipos */}
+            <div style={{ backgroundColor: REVOLUT_COLORS.canvasLight, borderColor: REVOLUT_COLORS.hairlineLight }} className="rounded-lg border p-6 transition-all hover:shadow-sm">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p style={{ color: REVOLUT_COLORS.body }} className="text-sm font-medium">Tipos de Ativo</p>
+                  <p style={{ color: REVOLUT_COLORS.ink, fontFamily: 'Aeonik Pro, sans-serif', fontSize: '32px', fontWeight: 500, letterSpacing: '-0.32px' }} className="mt-2">
+                    {assetTypeData.length}
+                  </p>
+                </div>
+                <div style={{ backgroundColor: REVOLUT_COLORS.accentTeal }} className="rounded-full p-3">
+                  <Target style={{ color: '#fff' }} className="h-5 w-5" />
+                </div>
+              </div>
             </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6 flex items-center gap-4">
-            <div className="p-3 rounded-xl bg-red-100">
-              <ArrowDownCircle className="h-6 w-6 text-red-600" />
+
+            {/* Receitas */}
+            <div style={{ backgroundColor: REVOLUT_COLORS.canvasLight, borderColor: REVOLUT_COLORS.hairlineLight }} className="rounded-lg border p-6 transition-all hover:shadow-sm">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p style={{ color: REVOLUT_COLORS.body }} className="text-sm font-medium">Receitas</p>
+                  <p style={{ color: REVOLUT_COLORS.accentGreen, fontFamily: 'Aeonik Pro, sans-serif', fontSize: '32px', fontWeight: 500, letterSpacing: '-0.32px' }} className="mt-2">
+                    {formatCurrency(totalReceitas)}
+                  </p>
+                </div>
+                <div style={{ backgroundColor: REVOLUT_COLORS.accentGreen }} className="rounded-full p-3">
+                  <ArrowUpCircle style={{ color: '#fff' }} className="h-5 w-5" />
+                </div>
+              </div>
             </div>
-            <div>
-              <p className="text-sm text-slate-500">Despesas</p>
-              <p className="text-xl font-bold text-red-600">{formatCurrency(totalDespesas)}</p>
+
+            {/* Despesas */}
+            <div style={{ backgroundColor: REVOLUT_COLORS.canvasLight, borderColor: REVOLUT_COLORS.hairlineLight }} className="rounded-lg border p-6 transition-all hover:shadow-sm">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p style={{ color: REVOLUT_COLORS.body }} className="text-sm font-medium">Despesas</p>
+                  <p style={{ color: REVOLUT_COLORS.accentPink, fontFamily: 'Aeonik Pro, sans-serif', fontSize: '32px', fontWeight: 500, letterSpacing: '-0.32px' }} className="mt-2">
+                    {formatCurrency(totalDespesas)}
+                  </p>
+                </div>
+                <div style={{ backgroundColor: REVOLUT_COLORS.accentPink }} className="rounded-full p-3">
+                  <ArrowDownCircle style={{ color: '#fff' }} className="h-5 w-5" />
+                </div>
+              </div>
             </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6 flex items-center gap-4">
-            <div className="p-3 rounded-xl bg-indigo-100">
-              <Wallet className="h-6 w-6 text-indigo-600" />
+
+            {/* Saldo */}
+            <div style={{ backgroundColor: REVOLUT_COLORS.canvasLight, borderColor: REVOLUT_COLORS.hairlineLight }} className="rounded-lg border p-6 transition-all hover:shadow-sm">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p style={{ color: REVOLUT_COLORS.body }} className="text-sm font-medium">Saldo Período</p>
+                  <p style={{ color: REVOLUT_COLORS.primary, fontFamily: 'Aeonik Pro, sans-serif', fontSize: '32px', fontWeight: 500, letterSpacing: '-0.32px' }} className="mt-2">
+                    {formatCurrency(saldoTransactions)}
+                  </p>
+                </div>
+                <div style={{ backgroundColor: REVOLUT_COLORS.primary }} className="rounded-full p-3">
+                  <Zap style={{ color: '#fff' }} className="h-5 w-5" />
+                </div>
+              </div>
             </div>
-            <div>
-              <p className="text-sm text-slate-500">Saldo no Período</p>
-              <p className="text-xl font-bold text-slate-900">{formatCurrency(saldoTransactions)}</p>
-            </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <Card>
-          <CardHeader>
-            <CardTitle>Evolução Mensal (Receitas, Despesas e Saldo)</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={280}>
-              <LineChart data={monthlyData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip formatter={(value) => formatCurrency(Number(value))} />
-                <Legend />
-                <Line type="monotone" dataKey="Receitas" stroke="#10B981" strokeWidth={2} name="Receitas" />
-                <Line type="monotone" dataKey="Despesas" stroke="#EF4444" strokeWidth={2} name="Despesas" />
-                <Line type="monotone" dataKey="Saldo" stroke="#3B82F6" strokeWidth={2} name="Saldo (Investível)" />
-              </LineChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+      {/* ========== CHARTS BAND (DARK) ========== */}
+      <div style={{ backgroundColor: REVOLUT_COLORS.canvasDark }} className="py-20">
+        <div className="max-w-5xl mx-auto px-6 sm:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Line Chart */}
+            <div style={{ backgroundColor: REVOLUT_COLORS.surfaceElevated, borderColor: REVOLUT_COLORS.hairlineDark }} className="rounded-lg border p-8">
+              <h3 style={{ color: REVOLUT_COLORS.onDark, fontFamily: 'Aeonik Pro, sans-serif', fontSize: '24px', fontWeight: 500, letterSpacing: '-0.32px' }} className="mb-8">
+                Evolução Mensal
+              </h3>
+              <ResponsiveContainer width="100%" height={280}>
+                <LineChart data={monthlyData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={REVOLUT_COLORS.hairlineDark} />
+                  <XAxis dataKey="name" stroke={REVOLUT_COLORS.onDarkMute} />
+                  <YAxis stroke={REVOLUT_COLORS.onDarkMute} />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: REVOLUT_COLORS.surfaceElevated,
+                      border: `1px solid ${REVOLUT_COLORS.hairlineDark}`,
+                      borderRadius: '12px',
+                      color: REVOLUT_COLORS.onDark
+                    }}
+                    formatter={(value) => formatCurrency(Number(value))}
+                  />
+                  <Legend wrapperStyle={{ color: REVOLUT_COLORS.onDarkMute }} />
+                  <Line type="monotone" dataKey="Receitas" stroke={REVOLUT_COLORS.accentGreen} strokeWidth={3} name="Receitas" dot={false} />
+                  <Line type="monotone" dataKey="Despesas" stroke={REVOLUT_COLORS.accentPink} strokeWidth={3} name="Despesas" dot={false} />
+                  <Line type="monotone" dataKey="Saldo" stroke={REVOLUT_COLORS.primary} strokeWidth={3} name="Saldo" dot={false} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
 
-      {assetTypeData.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Distribuição por tipo de ativo</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={280}>
-              <PieChart>
-                <Pie
-                  data={assetTypeData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}
-                  outerRadius={100}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {assetTypeData.map((_, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(value) => formatCurrency(Number(value))} />
-              </PieChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      )}
+            {/* Pie Chart */}
+            {assetTypeData.length > 0 && (
+              <div style={{ backgroundColor: REVOLUT_COLORS.surfaceElevated, borderColor: REVOLUT_COLORS.hairlineDark }} className="rounded-lg border p-8">
+                <h3 style={{ color: REVOLUT_COLORS.onDark, fontFamily: 'Aeonik Pro, sans-serif', fontSize: '24px', fontWeight: 500, letterSpacing: '-0.32px' }} className="mb-8">
+                  Distribuição por Tipo
+                </h3>
+                <ResponsiveContainer width="100%" height={280}>
+                  <PieChart>
+                    <Pie
+                      data={assetTypeData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}
+                      outerRadius={100}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {assetTypeData.map((_, index) => (
+                        <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: REVOLUT_COLORS.surfaceElevated,
+                        border: `1px solid ${REVOLUT_COLORS.hairlineDark}`,
+                        borderRadius: '12px',
+                        color: REVOLUT_COLORS.onDark
+                      }}
+                      formatter={(value) => formatCurrency(Number(value))}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>Meus investimentos</CardTitle>
-            <Button size="sm" onClick={() => setIsPosModalOpen(true)}>
-              <Plus className="h-4 w-4 mr-2" /> Adicionar
-            </Button>
+      {/* ========== INVESTMENTS TABLE (LIGHT) ========== */}
+      <div style={{ backgroundColor: REVOLUT_COLORS.canvasLight }} className="py-20">
+        <div className="max-w-5xl mx-auto px-6 sm:px-8">
+          <div className="flex items-center justify-between mb-8">
+            <h2 style={{ color: REVOLUT_COLORS.ink, fontFamily: 'Aeonik Pro, sans-serif', fontSize: '32px', fontWeight: 500, letterSpacing: '-0.32px' }}>
+              Meus Investimentos
+            </h2>
+            <RevolutButton variant="primary" size="md" onClick={() => setIsPosModalOpen(true)}>
+              <Plus className="h-4 w-4" />
+              Adicionar
+            </RevolutButton>
           </div>
-        </CardHeader>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Ativo</TableHead>
-                <TableHead>Instituição</TableHead>
-                <TableHead>Tipo</TableHead>
-                <TableHead>Qtd</TableHead>
-                <TableHead>Valor</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {positions.map((p) => (
-                <TableRow key={p.id}>
-                  <TableCell className="font-medium">{p.asset_name}</TableCell>
-                  <TableCell>{p.institution}</TableCell>
-                  <TableCell>
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                      {p.asset_type}
-                    </span>
-                  </TableCell>
-                  <TableCell>{p.quantity}</TableCell>
-                  <TableCell className="font-semibold text-green-600">{formatCurrency(Number(p.amount))}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-          {positions.length === 0 && (
-            <div className="text-center py-12 text-slate-500">
-              Nenhum investimento cadastrado ainda. Peça ao seu consultor para incluir posições ou envie um extrato em{' '}
-              <button type="button" className="text-blue-600 font-medium" onClick={() => navigate('/upload')}>
-                Inserir dados
-              </button>
-              .
-            </div>
-          )}
-        </CardContent>
-      </Card>
 
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>Transações (Receitas e Despesas)</CardTitle>
-            <Button size="sm" onClick={() => setIsTxModalOpen(true)}>
-              <Plus className="h-4 w-4 mr-2" /> Adicionar
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Data</TableHead>
-                <TableHead>Descrição</TableHead>
-                <TableHead>Categoria</TableHead>
-                <TableHead>Tipo</TableHead>
-                <TableHead>Valor</TableHead>
-                <TableHead>Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {transactions.map((t) => (
-                <TableRow key={t.id}>
-                  {editingTxId === t.id ? (
-                    <>
-                      <TableCell>
-                        <Input type="date" value={editTxValues.date || ''} onChange={(e) => setEditTxValues({...editTxValues, date: e.target.value})} />
-                      </TableCell>
-                      <TableCell>
-                        <Input value={editTxValues.description || ''} onChange={(e) => setEditTxValues({...editTxValues, description: e.target.value})} />
-                      </TableCell>
-                      <TableCell>
-                        <Input value={editTxValues.category || ''} onChange={(e) => setEditTxValues({...editTxValues, category: e.target.value})} />
-                      </TableCell>
-                      <TableCell>
-                        <select
-                          className="w-full px-3 py-2 border border-slate-200 rounded-md focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-transparent"
-                          value={editTxValues.type || 'receita'}
-                          onChange={(e) => setEditTxValues({...editTxValues, type: e.target.value})}
-                        >
-                          <option value="receita">Receita</option>
-                          <option value="despesa">Despesa</option>
-                        </select>
-                      </TableCell>
-                      <TableCell>
-                        <Input type="number" step="0.01" value={editTxValues.amount || ''} onChange={(e) => setEditTxValues({...editTxValues, amount: e.target.value})} />
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Button size="sm" variant="ghost" onClick={() => handleSaveTxEdit(t.id)}>
-                            <Save className="h-4 w-4 text-emerald-600" />
-                          </Button>
-                          <Button size="sm" variant="ghost" onClick={() => setEditingTxId(null)}>
-                            <X className="h-4 w-4 text-red-600" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </>
-                  ) : (
-                    <>
-                      <TableCell>{t.date ? new Date(t.date).toLocaleDateString('pt-BR') : '-'}</TableCell>
-                      <TableCell className="font-medium">{t.description}</TableCell>
-                      <TableCell>{t.category || '-'}</TableCell>
-                      <TableCell>
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${t.type === 'receita' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}`}>
-                          {t.type}
+          <div style={{ backgroundColor: REVOLUT_COLORS.canvasLight, borderColor: REVOLUT_COLORS.hairlineLight }} className="rounded-lg border overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr style={{ backgroundColor: REVOLUT_COLORS.surfaceSoft, borderBottom: `1px solid ${REVOLUT_COLORS.hairlineLight}` }}>
+                    <th style={{ color: REVOLUT_COLORS.body }} className="text-left px-6 py-4 text-sm font-semibold">Ativo</th>
+                    <th style={{ color: REVOLUT_COLORS.body }} className="text-left px-6 py-4 text-sm font-semibold">Instituição</th>
+                    <th style={{ color: REVOLUT_COLORS.body }} className="text-left px-6 py-4 text-sm font-semibold">Tipo</th>
+                    <th style={{ color: REVOLUT_COLORS.body }} className="text-left px-6 py-4 text-sm font-semibold">Qtd</th>
+                    <th style={{ color: REVOLUT_COLORS.body }} className="text-right px-6 py-4 text-sm font-semibold">Valor</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {positions.map((p) => (
+                    <tr key={p.id} style={{ borderBottom: `1px solid ${REVOLUT_COLORS.hairlineLight}` }} className="hover:bg-slate-50 transition-colors">
+                      <td style={{ color: REVOLUT_COLORS.ink }} className="px-6 py-4 font-semibold text-sm">{p.asset_name}</td>
+                      <td style={{ color: REVOLUT_COLORS.body }} className="px-6 py-4 text-sm">{p.institution}</td>
+                      <td className="px-6 py-4">
+                        <span style={{ backgroundColor: REVOLUT_COLORS.primary + '15', color: REVOLUT_COLORS.primary }} className="text-xs font-semibold px-3 py-1.5 rounded-full">
+                          {p.asset_type}
                         </span>
-                      </TableCell>
-                      <TableCell className={`font-semibold ${t.type === 'receita' ? 'text-emerald-600' : 'text-red-600'}`}>
-                        {t.type === 'receita' ? '+' : '-'}{formatCurrency(Number(t.amount))}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1">
-                          <Button size="sm" variant="ghost" onClick={() => handleEditTx(t)}>
-                            <Pencil className="h-4 w-4 text-blue-600" />
-                          </Button>
-                          <Button size="sm" variant="ghost" onClick={() => handleDeleteTx(t.id)}>
-                            <Trash2 className="h-4 w-4 text-red-500" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </>
-                  )}
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-          {transactions.length === 0 && (
-            <div className="text-center py-12 text-slate-500">
-              Nenhuma transação cadastrada ainda. Envie um extrato que contenha receitas e despesas.
+                      </td>
+                      <td style={{ color: REVOLUT_COLORS.body }} className="px-6 py-4 text-sm">{p.quantity}</td>
+                      <td style={{ color: REVOLUT_COLORS.accentGreen }} className="px-6 py-4 text-right font-bold text-sm">{formatCurrency(Number(p.amount))}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-          )}
-        </CardContent>
-      </Card>
 
-      {/* Modal Nova Transação */}
+            {positions.length === 0 && (
+              <div className="text-center py-16" style={{ color: REVOLUT_COLORS.body }}>
+                <Wallet className="h-12 w-12 mx-auto mb-4 opacity-40" />
+                <p className="text-sm font-medium mb-2">Nenhum investimento cadastrado</p>
+                <button onClick={() => setIsPosModalOpen(true)} style={{ color: REVOLUT_COLORS.primary }} className="text-sm font-semibold hover:underline">
+                  Adicione sua primeira posição
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* ========== TRANSACTIONS TABLE (DARK) ========== */}
+      <div style={{ backgroundColor: REVOLUT_COLORS.canvasDark }} className="py-20 pb-32">
+        <div className="max-w-5xl mx-auto px-6 sm:px-8">
+          <div className="flex items-center justify-between mb-8">
+            <h2 style={{ color: REVOLUT_COLORS.onDark, fontFamily: 'Aeonik Pro, sans-serif', fontSize: '32px', fontWeight: 500, letterSpacing: '-0.32px' }}>
+              Transações
+            </h2>
+            <RevolutButton variant="primary" size="md" onClick={() => setIsTxModalOpen(true)}>
+              <Plus className="h-4 w-4" />
+              Adicionar
+            </RevolutButton>
+          </div>
+
+          <div style={{ backgroundColor: REVOLUT_COLORS.surfaceElevated, borderColor: REVOLUT_COLORS.hairlineDark }} className="rounded-lg border overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr style={{ backgroundColor: REVOLUT_COLORS.canvasDark, borderBottom: `1px solid ${REVOLUT_COLORS.hairlineDark}` }}>
+                    <th style={{ color: REVOLUT_COLORS.onDarkMute }} className="text-left px-6 py-4 text-sm font-semibold">Data</th>
+                    <th style={{ color: REVOLUT_COLORS.onDarkMute }} className="text-left px-6 py-4 text-sm font-semibold">Descrição</th>
+                    <th style={{ color: REVOLUT_COLORS.onDarkMute }} className="text-left px-6 py-4 text-sm font-semibold">Categoria</th>
+                    <th style={{ color: REVOLUT_COLORS.onDarkMute }} className="text-left px-6 py-4 text-sm font-semibold">Tipo</th>
+                    <th style={{ color: REVOLUT_COLORS.onDarkMute }} className="text-right px-6 py-4 text-sm font-semibold">Valor</th>
+                    <th style={{ color: REVOLUT_COLORS.onDarkMute }} className="text-right px-6 py-4 text-sm font-semibold">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {transactions.map((t) => (
+                    <tr key={t.id} style={{ borderBottom: `1px solid ${REVOLUT_COLORS.hairlineDark}` }} className="hover:bg-slate-800/50 transition-colors">
+                      {editingTxId === t.id ? (
+                        <>
+                          <td className="px-6 py-4">
+                            <input type="date" value={editTxValues.date || ''} onChange={(e) => setEditTxValues({ ...editTxValues, date: e.target.value })} style={{ backgroundColor: REVOLUT_COLORS.canvasDark, borderColor: REVOLUT_COLORS.hairlineDark, color: REVOLUT_COLORS.onDark }} className="w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+                          </td>
+                          <td className="px-6 py-4">
+                            <input value={editTxValues.description || ''} onChange={(e) => setEditTxValues({ ...editTxValues, description: e.target.value })} style={{ backgroundColor: REVOLUT_COLORS.canvasDark, borderColor: REVOLUT_COLORS.hairlineDark, color: REVOLUT_COLORS.onDark }} className="w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+                          </td>
+                          <td className="px-6 py-4">
+                            <input value={editTxValues.category || ''} onChange={(e) => setEditTxValues({ ...editTxValues, category: e.target.value })} style={{ backgroundColor: REVOLUT_COLORS.canvasDark, borderColor: REVOLUT_COLORS.hairlineDark, color: REVOLUT_COLORS.onDark }} className="w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+                          </td>
+                          <td className="px-6 py-4">
+                            <select style={{ backgroundColor: REVOLUT_COLORS.canvasDark, borderColor: REVOLUT_COLORS.hairlineDark, color: REVOLUT_COLORS.onDark }} className="w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-blue-500 outline-none" value={editTxValues.type || 'receita'} onChange={(e) => setEditTxValues({ ...editTxValues, type: e.target.value })}>
+                              <option value="receita">Receita</option>
+                              <option value="despesa">Despesa</option>
+                            </select>
+                          </td>
+                          <td className="px-6 py-4">
+                            <input type="number" step="0.01" value={editTxValues.amount || ''} onChange={(e) => setEditTxValues({ ...editTxValues, amount: e.target.value })} style={{ backgroundColor: REVOLUT_COLORS.canvasDark, borderColor: REVOLUT_COLORS.hairlineDark, color: REVOLUT_COLORS.onDark }} className="w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-blue-500 outline-none text-right" />
+                          </td>
+                          <td className="px-6 py-4 text-right space-x-2 flex justify-end">
+                            <button onClick={() => handleSaveTxEdit(t.id)} className="p-2 hover:bg-slate-700 rounded-md transition-colors">
+                              <Save style={{ color: REVOLUT_COLORS.accentGreen }} className="h-4 w-4" />
+                            </button>
+                            <button onClick={() => setEditingTxId(null)} className="p-2 hover:bg-slate-700 rounded-md transition-colors">
+                              <X style={{ color: REVOLUT_COLORS.accentPink }} className="h-4 w-4" />
+                            </button>
+                          </td>
+                        </>
+                      ) : (
+                        <>
+                          <td style={{ color: REVOLUT_COLORS.onDarkMute }} className="px-6 py-4 text-sm">{t.date ? new Date(t.date).toLocaleDateString('pt-BR') : '-'}</td>
+                          <td style={{ color: REVOLUT_COLORS.onDark }} className="px-6 py-4 text-sm font-semibold">{t.description}</td>
+                          <td style={{ color: REVOLUT_COLORS.onDarkMute }} className="px-6 py-4 text-sm">{t.category || '-'}</td>
+                          <td className="px-6 py-4">
+                            <span style={{ backgroundColor: t.type === 'receita' ? REVOLUT_COLORS.accentGreen + '20' : REVOLUT_COLORS.accentPink + '20', color: t.type === 'receita' ? REVOLUT_COLORS.accentGreen : REVOLUT_COLORS.accentPink }} className="text-xs font-semibold px-3 py-1.5 rounded-full">
+                              {t.type}
+                            </span>
+                          </td>
+                          <td style={{ color: t.type === 'receita' ? REVOLUT_COLORS.accentGreen : REVOLUT_COLORS.accentPink }} className="px-6 py-4 text-right font-bold text-sm">
+                            {t.type === 'receita' ? '+' : '-'}{formatCurrency(Number(t.amount))}
+                          </td>
+                          <td className="px-6 py-4 text-right space-x-2 flex justify-end">
+                            <button onClick={() => handleEditTx(t)} className="p-2 hover:bg-slate-700 rounded-md transition-colors">
+                              <Pencil style={{ color: REVOLUT_COLORS.accentBlue }} className="h-4 w-4" />
+                            </button>
+                            <button onClick={() => handleDeleteTx(t.id)} className="p-2 hover:bg-slate-700 rounded-md transition-colors">
+                              <Trash2 style={{ color: REVOLUT_COLORS.accentPink }} className="h-4 w-4" />
+                            </button>
+                          </td>
+                        </>
+                      )}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {transactions.length === 0 && (
+              <div className="text-center py-16" style={{ color: REVOLUT_COLORS.onDarkMute }}>
+                <ArrowUpCircle className="h-12 w-12 mx-auto mb-4 opacity-40" />
+                <p className="text-sm font-medium mb-2">Nenhuma transação cadastrada</p>
+                <button onClick={() => setIsTxModalOpen(true)} style={{ color: REVOLUT_COLORS.primary }} className="text-sm font-semibold hover:underline">
+                  Adicione sua primeira transação
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* ========== MODAL TRANSAÇÃO (LIGHT) ========== */}
       {isTxModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
-            <div className="flex justify-between items-center p-6 border-b border-slate-100">
-              <h2 className="text-xl font-semibold text-slate-900">Nova Transação</h2>
-              <button onClick={() => setIsTxModalOpen(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
+        <div style={{ backgroundColor: 'rgba(0,0,0,0.5)' }} className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div style={{ backgroundColor: REVOLUT_COLORS.canvasLight }} className="rounded-lg shadow-2xl w-full max-w-md overflow-hidden">
+            <div style={{ backgroundColor: REVOLUT_COLORS.canvasLight, borderBottom: `1px solid ${REVOLUT_COLORS.hairlineLight}` }} className="flex justify-between items-center p-6">
+              <h2 style={{ color: REVOLUT_COLORS.ink, fontFamily: 'Aeonik Pro, sans-serif', fontSize: '24px', fontWeight: 500, letterSpacing: '-0.32px' }}>Nova Transação</h2>
+              <button onClick={() => setIsTxModalOpen(false)} style={{ color: REVOLUT_COLORS.body }} className="hover:bg-slate-100 p-2 rounded-md transition-colors">
                 <X className="h-5 w-5" />
               </button>
             </div>
             <form onSubmit={handleAddTransaction} className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Tipo</label>
-                <select
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
-                  value={txForm.type}
-                  onChange={e => setTxForm({...txForm, type: e.target.value})}
-                >
+                <label style={{ color: REVOLUT_COLORS.body }} className="block text-sm font-semibold mb-2">Tipo</label>
+                <select style={{ backgroundColor: REVOLUT_COLORS.canvasLight, borderColor: REVOLUT_COLORS.hairlineLight, color: REVOLUT_COLORS.ink }} className="w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-medium" value={txForm.type} onChange={e => setTxForm({ ...txForm, type: e.target.value })}>
                   <option value="receita">Receita</option>
                   <option value="despesa">Despesa</option>
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Descrição</label>
-                <Input required value={txForm.description} onChange={e => setTxForm({...txForm, description: e.target.value})} placeholder="Ex: Salário, Aluguel..." />
+                <label style={{ color: REVOLUT_COLORS.body }} className="block text-sm font-semibold mb-2">Descrição</label>
+                <Input required value={txForm.description} onChange={e => setTxForm({ ...txForm, description: e.target.value })} placeholder="Ex: Salário, Aluguel..." />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Categoria</label>
-                <Input value={txForm.category} onChange={e => setTxForm({...txForm, category: e.target.value})} placeholder="Ex: Alimentação, Renda..." />
+                <label style={{ color: REVOLUT_COLORS.body }} className="block text-sm font-semibold mb-2">Categoria</label>
+                <Input value={txForm.category} onChange={e => setTxForm({ ...txForm, category: e.target.value })} placeholder="Ex: Alimentação, Renda..." />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Valor (R$)</label>
-                  <Input required type="number" step="0.01" min="0" value={txForm.amount} onChange={e => setTxForm({...txForm, amount: e.target.value})} placeholder="0.00" />
+                  <label style={{ color: REVOLUT_COLORS.body }} className="block text-sm font-semibold mb-2">Valor (R$)</label>
+                  <Input required type="number" step="0.01" min="0" value={txForm.amount} onChange={e => setTxForm({ ...txForm, amount: e.target.value })} placeholder="0.00" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Data</label>
-                  <Input required type="date" value={txForm.date} onChange={e => setTxForm({...txForm, date: e.target.value})} />
+                  <label style={{ color: REVOLUT_COLORS.body }} className="block text-sm font-semibold mb-2">Data</label>
+                  <Input required type="date" value={txForm.date} onChange={e => setTxForm({ ...txForm, date: e.target.value })} />
                 </div>
               </div>
               <div className="pt-4 flex justify-end gap-3">
-                <Button type="button" variant="secondary" onClick={() => setIsTxModalOpen(false)}>Cancelar</Button>
-                <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Salvando...' : 'Salvar'}</Button>
+                <RevolutButton variant="soft" size="md" type="button" onClick={() => setIsTxModalOpen(false)}>
+                  Cancelar
+                </RevolutButton>
+                <RevolutButton variant="primary" size="md" type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? 'Salvando...' : 'Salvar'}
+                </RevolutButton>
               </div>
             </form>
           </div>
         </div>
       )}
 
-      {/* Modal Novo Investimento */}
+      {/* ========== MODAL INVESTIMENTO (LIGHT) ========== */}
       {isPosModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
-            <div className="flex justify-between items-center p-6 border-b border-slate-100">
-              <h2 className="text-xl font-semibold text-slate-900">Novo Investimento</h2>
-              <button onClick={() => setIsPosModalOpen(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
+        <div style={{ backgroundColor: 'rgba(0,0,0,0.5)' }} className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div style={{ backgroundColor: REVOLUT_COLORS.canvasLight }} className="rounded-lg shadow-2xl w-full max-w-md overflow-hidden">
+            <div style={{ backgroundColor: REVOLUT_COLORS.canvasLight, borderBottom: `1px solid ${REVOLUT_COLORS.hairlineLight}` }} className="flex justify-between items-center p-6">
+              <h2 style={{ color: REVOLUT_COLORS.ink, fontFamily: 'Aeonik Pro, sans-serif', fontSize: '24px', fontWeight: 500, letterSpacing: '-0.32px' }}>Novo Investimento</h2>
+              <button onClick={() => setIsPosModalOpen(false)} style={{ color: REVOLUT_COLORS.body }} className="hover:bg-slate-100 p-2 rounded-md transition-colors">
                 <X className="h-5 w-5" />
               </button>
             </div>
             <form onSubmit={handleAddPosition} className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Ativo</label>
-                <Input required value={posForm.asset_name} onChange={e => setPosForm({...posForm, asset_name: e.target.value})} placeholder="Ex: PETR4, Tesouro Selic..." />
+                <label style={{ color: REVOLUT_COLORS.body }} className="block text-sm font-semibold mb-2">Ativo</label>
+                <Input required value={posForm.asset_name} onChange={e => setPosForm({ ...posForm, asset_name: e.target.value })} placeholder="Ex: PETR4, Tesouro Selic..." />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Instituição</label>
-                <Input required value={posForm.institution} onChange={e => setPosForm({...posForm, institution: e.target.value})} placeholder="Ex: XP Investimentos, BTG..." />
+                <label style={{ color: REVOLUT_COLORS.body }} className="block text-sm font-semibold mb-2">Instituição</label>
+                <Input required value={posForm.institution} onChange={e => setPosForm({ ...posForm, institution: e.target.value })} placeholder="Ex: XP Investimentos, BTG..." />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Tipo de Ativo</label>
-                <Input required value={posForm.asset_type} onChange={e => setPosForm({...posForm, asset_type: e.target.value})} placeholder="Ex: Ação, FII, Renda Fixa..." />
+                <label style={{ color: REVOLUT_COLORS.body }} className="block text-sm font-semibold mb-2">Tipo de Ativo</label>
+                <Input required value={posForm.asset_type} onChange={e => setPosForm({ ...posForm, asset_type: e.target.value })} placeholder="Ex: Ação, FII, Renda Fixa..." />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Quantidade</label>
-                  <Input required type="number" step="0.01" min="0" value={posForm.quantity} onChange={e => setPosForm({...posForm, quantity: e.target.value})} placeholder="0" />
+                  <label style={{ color: REVOLUT_COLORS.body }} className="block text-sm font-semibold mb-2">Quantidade</label>
+                  <Input required type="number" step="0.01" min="0" value={posForm.quantity} onChange={e => setPosForm({ ...posForm, quantity: e.target.value })} placeholder="0" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Valor Total (R$)</label>
-                  <Input required type="number" step="0.01" min="0" value={posForm.amount} onChange={e => setPosForm({...posForm, amount: e.target.value})} placeholder="0.00" />
+                  <label style={{ color: REVOLUT_COLORS.body }} className="block text-sm font-semibold mb-2">Valor Total (R$)</label>
+                  <Input required type="number" step="0.01" min="0" value={posForm.amount} onChange={e => setPosForm({ ...posForm, amount: e.target.value })} placeholder="0.00" />
                 </div>
               </div>
               <div className="pt-4 flex justify-end gap-3">
-                <Button type="button" variant="secondary" onClick={() => setIsPosModalOpen(false)}>Cancelar</Button>
-                <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Salvando...' : 'Salvar'}</Button>
+                <RevolutButton variant="soft" size="md" type="button" onClick={() => setIsPosModalOpen(false)}>
+                  Cancelar
+                </RevolutButton>
+                <RevolutButton variant="primary" size="md" type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? 'Salvando...' : 'Salvar'}
+                </RevolutButton>
               </div>
             </form>
           </div>
         </div>
       )}
     </div>
-    )
   );
 };

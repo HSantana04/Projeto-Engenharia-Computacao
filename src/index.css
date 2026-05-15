@@ -1,50 +1,140 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  
   body {
-    @apply font-sans antialiased text-slate-800 bg-slate-50;
+    @apply font-sans antialiased text-ink bg-canvas-light;
     font-family: 'Inter', sans-serif;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display;
+  }
+}
+
+@layer components {
+  /* Button Components */
+  .btn-primary {
+    @apply bg-canvas-light text-canvas-dark px-7 py-3 rounded-full font-button-md transition-colors hover:bg-faint disabled:opacity-50;
+  }
+  
+  .btn-primary-pressed {
+    @apply bg-faint text-canvas-dark px-7 py-3 rounded-full font-button-md;
+  }
+  
+  .btn-dark {
+    @apply bg-canvas-dark text-on-dark px-7 py-3 rounded-full font-button-md transition-colors hover:bg-surface-elevated disabled:opacity-50;
+  }
+  
+  .btn-soft {
+    @apply bg-surface-soft text-ink px-7 py-3 rounded-full font-button-md transition-colors hover:bg-hairline-light disabled:opacity-50;
+  }
+  
+  .btn-outline-light {
+    @apply bg-canvas-light text-ink border border-hairline-strong px-7 py-3 rounded-full font-button-md transition-colors hover:bg-surface-soft disabled:opacity-50;
+  }
+  
+  .btn-outline-dark {
+    @apply bg-canvas-dark text-on-dark border border-on-dark px-7 py-3 rounded-full font-button-md transition-colors hover:bg-surface-elevated disabled:opacity-50;
+  }
+  
+  .btn-pill-sm {
+    @apply bg-surface-soft text-ink px-4 py-2 rounded-full font-button-sm transition-colors hover:bg-hairline-light disabled:opacity-50;
+  }
+  
+  /* Card Components */
+  .feature-card-light {
+    @apply bg-surface-card text-ink border border-hairline-light rounded-lg p-xxl;
+  }
+  
+  .feature-card-dark {
+    @apply bg-surface-elevated text-on-dark rounded-lg p-xxl;
+  }
+  
+  .plan-card {
+    @apply bg-surface-elevated text-on-dark rounded-lg p-xxl;
+  }
+  
+  .plan-card-featured {
+    @apply bg-primary text-on-primary rounded-lg p-xxl;
+  }
+  
+  /* Input Component */
+  .text-input {
+    @apply w-full bg-canvas-light text-ink border border-hairline-light rounded-md px-4 py-3.5 text-body-md transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10;
+  }
+  
+  /* Navigation */
+  .nav-bar {
+    @apply bg-canvas-dark text-on-dark h-16 flex items-center;
+  }
+  
+  .sub-nav-pill {
+    @apply bg-surface-elevated text-on-dark px-4 py-2 rounded-full text-button-sm transition-colors hover:bg-surface-deep;
+  }
+  
+  /* Hero Bands */
+  .hero-band-dark {
+    @apply bg-canvas-dark text-on-dark py-section px-6;
+  }
+  
+  .hero-band-photo {
+    @apply bg-canvas-dark text-on-dark;
+  }
+  
+  /* Badge Components */
+  .badge-tag {
+    @apply bg-surface-soft text-ink px-3 py-1 rounded-full text-caption;
+  }
+  
+  .badge-feature {
+    @apply bg-primary text-on-primary px-3 py-1 rounded-full text-caption;
+  }
+  
+  /* Footer */
+  .footer {
+    @apply bg-canvas-dark text-on-dark-mute py-block px-6;
   }
 }
 
 @layer utilities {
-  .glass {
-    @apply bg-white/70 backdrop-blur-lg border border-white/40 shadow-sm rounded-2xl;
-  }
-  
-  .glass-dark {
-    @apply bg-slate-900/80 backdrop-blur-xl border border-white/10 shadow-xl rounded-2xl;
-  }
-
-  .glass-card {
-    @apply bg-white/60 backdrop-blur-md border border-white/50 shadow-sm rounded-xl hover:bg-white/80 transition-all duration-300;
-  }
-
-  .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-cyan-500 to-blue-600;
-  }
-
-  .bg-gradient-premium {
-    @apply bg-gradient-to-br from-cyan-50 via-white to-orange-50;
-  }
-  
   /* Custom Scrollbar */
   ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 8px;
+    height: 8px;
   }
+  
   ::-webkit-scrollbar-track {
     background: transparent;
   }
+  
   ::-webkit-scrollbar-thumb {
-    @apply bg-slate-200 rounded-full;
+    @apply bg-hairline-light rounded-full;
   }
+  
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-slate-300;
+    @apply bg-stone;
+  }
+  
+  /* Dark mode scrollbar */
+  .dark ::-webkit-scrollbar-thumb {
+    @apply bg-hairline-dark;
+  }
+  
+  .dark ::-webkit-scrollbar-thumb:hover {
+    @apply bg-mute;
+  }
+  
+  /* Utility classes */
+  .surface-gradient {
+    @apply bg-gradient-to-br from-canvas-light to-surface-soft;
   }
 }
 

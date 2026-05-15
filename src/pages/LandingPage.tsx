@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom';
 import { BarChart3, Upload, Users, ArrowRight, Shield, Zap, ChevronRight } from 'lucide-react';
+import { Button } from '../components/ui/Button';
+import { Card, CardContent } from '../components/ui/Card';
 
 const features = [
   {
@@ -28,35 +30,33 @@ const stats = [
 
 export const LandingPage = () => {
   return (
-    <div className="min-h-screen bg-white overflow-hidden">
-
+    <div className="min-h-screen bg-canvas-light overflow-hidden">
       {/* Navbar */}
-      <nav className="relative z-10 border-b border-gray-100">
+      <nav className="relative z-10 border-b border-hairline-light">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-2">
-              <span className="text-xl font-bold text-black tracking-tight">FinansmartAI</span>
+              <span className="text-heading-md font-display font-bold text-ink">FinansmartAI</span>
             </div>
 
             <div className="hidden md:flex items-center gap-8">
-              <a href="#features" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
+              <a href="#features" className="text-body-md font-semibold text-ink hover:text-primary transition-colors">
                 Funcionalidades
               </a>
-              <a href="#security" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
+              <a href="#security" className="text-body-md font-semibold text-ink hover:text-primary transition-colors">
                 Segurança
               </a>
-              <a href="#stats" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
+              <a href="#stats" className="text-body-md font-semibold text-ink hover:text-primary transition-colors">
                 Números
               </a>
             </div>
 
             <div className="flex items-center gap-3">
-              <Link
-                to="/login"
-                className="px-5 py-2 text-sm font-medium text-white bg-gray-900 rounded-full hover:bg-gray-800 transition-all duration-200 flex items-center gap-2"
-              >
-                Login
-                <ArrowRight className="h-3.5 w-3.5" />
+              <Link to="/login" className="inline-block">
+                <Button variant="primary" className="flex items-center gap-2">
+                  Login
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
               </Link>
             </div>
           </div>
@@ -64,67 +64,66 @@ export const LandingPage = () => {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative z-10 pt-20 pb-32 sm:pt-28 sm:pb-40">
+      <section className="relative z-10 py-section sm:py-band">
         <div className="max-w-4xl mx-auto px-4 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-blue-50 rounded-full text-sm font-medium text-blue-700 mb-8">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full text-body-sm font-semibold text-primary mb-lg">
             FinansmartAI
           </div>
 
-          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-gray-900 tracking-tight leading-[1.1]">
+          <h1 className="text-display-lg sm:text-display-xl font-display text-ink leading-tight tracking-tight">
             Gerencie portfólios{' '}
-            <span className="bg-gradient-to-r from-blue-600 via-violet-600 to-purple-600 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-primary to-primary-bright bg-clip-text text-transparent">
               com inteligência
             </span>
           </h1>
 
-          <p className="mt-6 text-lg sm:text-xl text-gray-500 max-w-2xl mx-auto leading-relaxed">
+          <p className="mt-xl text-body-lg text-stone max-w-2xl mx-auto leading-relaxed">
             A plataforma completa para consultores de investimentos. Consolide carteiras, extraia dados automaticamente e ofereça o melhor atendimento aos seus clientes.
           </p>
 
-          <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link
-              to="/login"
-              className="group px-8 py-3.5 text-sm font-semibold text-white bg-gray-900 rounded-full hover:bg-gray-800 transition-all duration-200 flex items-center gap-2 shadow-lg shadow-gray-900/20"
-            >
-              Começar Agora
-              <ChevronRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
+          <div className="mt-xl flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Link to="/login">
+              <Button variant="primary" className="flex items-center gap-2">
+                Começar Agora
+                <ChevronRight className="h-4 w-4" />
+              </Button>
             </Link>
-            <a
-              href="#features"
-              className="px-8 py-3.5 text-sm font-semibold text-gray-700 bg-white border border-gray-200 rounded-full hover:bg-gray-50 transition-all duration-200"
-            >
-              Explorar funcionalidades
+            <a href="#features">
+              <Button variant="outline-light" className="px-7">
+                Explorar funcionalidades
+              </Button>
             </a>
           </div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section id="features" className="relative z-10 py-24 bg-gray-50/70">
+      <section id="features" className="relative z-10 py-section bg-surface-soft">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">
+          <div className="text-center mb-section">
+            <h2 className="text-display-md sm:text-display-lg font-display text-ink tracking-tight">
               Tudo que você precisa
             </h2>
-            <p className="mt-4 text-lg text-gray-500 max-w-2xl mx-auto">
+            <p className="mt-lg text-body-lg text-stone max-w-2xl mx-auto">
               Ferramentas poderosas para transformar a forma como você gerencia os investimentos dos seus clientes.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-lg">
             {features.map((feature) => {
               const Icon = feature.icon;
               return (
-                <div
-                  key={feature.title}
-                  className="group relative bg-white rounded-2xl p-8 border border-gray-200 hover:border-gray-300 hover:shadow-lg transition-all duration-300"
-                >
-                  <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center mb-6 group-hover:bg-blue-100 transition-colors">
-                    <Icon className="h-6 w-6 text-blue-600" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-3">{feature.title}</h3>
-                  <p className="text-gray-500 leading-relaxed">{feature.description}</p>
-                </div>
+                <Card key={feature.title} variant="light">
+                  <CardContent className="p-xxl space-y-4">
+                    <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Icon className="h-6 w-6 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="text-heading-md font-display text-ink mb-2">{feature.title}</h3>
+                      <p className="text-body-md text-stone">{feature.description}</p>
+                    </div>
+                  </CardContent>
+                </Card>
               );
             })}
           </div>
@@ -132,14 +131,14 @@ export const LandingPage = () => {
       </section>
 
       {/* Security Section */}
-      <section id="security" className="relative z-10 py-24">
+      <section id="security" className="relative z-10 py-section">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl p-12 sm:p-16 text-center relative overflow-hidden">
+          <div className="hero-band-dark rounded-lg p-section sm:p-band text-center relative overflow-hidden">
             <div className="absolute inset-0 opacity-10">
               {[...Array(6)].map((_, i) => (
                 <div
                   key={i}
-                  className="absolute rounded-full border border-white/20"
+                  className="absolute rounded-full border border-on-dark/20"
                   style={{
                     width: `${(i + 1) * 200}px`,
                     height: `${(i + 1) * 200}px`,
@@ -150,27 +149,29 @@ export const LandingPage = () => {
                 />
               ))}
             </div>
-            <div className="relative z-10">
-              <div className="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur flex items-center justify-center mx-auto mb-8">
-                <Shield className="h-8 w-8 text-white" />
+            <div className="relative z-10 space-y-lg">
+              <div className="w-16 h-16 rounded-lg bg-on-dark/10 backdrop-blur flex items-center justify-center mx-auto">
+                <Shield className="h-8 w-8 text-on-dark" />
               </div>
-              <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
-                Segurança de nível bancário
-              </h2>
-              <p className="mt-4 text-lg text-gray-400 max-w-2xl mx-auto leading-relaxed">
-                Seus dados e os de seus clientes protegidos com criptografia AES-256, infraestrutura Supabase e conformidade com as melhores práticas do mercado.
-              </p>
-              <div className="mt-8 flex flex-wrap items-center justify-center gap-6">
-                <div className="flex items-center gap-2 text-sm text-gray-300">
-                  <Zap className="h-4 w-4 text-green-400" />
+              <div>
+                <h2 className="text-display-md sm:text-display-lg font-display text-on-dark tracking-tight">
+                  Segurança de nível bancário
+                </h2>
+                <p className="mt-md text-body-lg text-on-dark-mute max-w-2xl mx-auto leading-relaxed">
+                  Seus dados e os de seus clientes protegidos com criptografia AES-256, infraestrutura Supabase e conformidade com as melhores práticas do mercado.
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center justify-center gap-lg pt-4">
+                <div className="flex items-center gap-2 text-body-md text-on-dark-mute">
+                  <Zap className="h-5 w-5 text-accent-light-green" />
                   Autenticação segura
                 </div>
-                <div className="flex items-center gap-2 text-sm text-gray-300">
-                  <Zap className="h-4 w-4 text-green-400" />
+                <div className="flex items-center gap-2 text-body-md text-on-dark-mute">
+                  <Zap className="h-5 w-5 text-accent-light-green" />
                   Dados criptografados
                 </div>
-                <div className="flex items-center gap-2 text-sm text-gray-300">
-                  <Zap className="h-4 w-4 text-green-400" />
+                <div className="flex items-center gap-2 text-body-md text-on-dark-mute">
+                  <Zap className="h-5 w-5 text-accent-light-green" />
                   Backups automáticos
                 </div>
               </div>
@@ -180,13 +181,13 @@ export const LandingPage = () => {
       </section>
 
       {/* Stats Section */}
-      <section id="stats" className="relative z-10 py-24 bg-gray-50/70">
+      <section id="stats" className="relative z-10 py-section bg-surface-soft">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-lg">
             {stats.map((stat) => (
               <div key={stat.label} className="text-center">
-                <p className="text-4xl sm:text-5xl font-bold text-gray-900 tracking-tight">{stat.value}</p>
-                <p className="mt-2 text-sm font-medium text-gray-500">{stat.label}</p>
+                <p className="text-heading-lg sm:text-display-md font-display text-ink tracking-tight">{stat.value}</p>
+                <p className="mt-md text-body-sm font-semibold text-stone">{stat.label}</p>
               </div>
             ))}
           </div>
@@ -194,34 +195,29 @@ export const LandingPage = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="relative z-10 py-24">
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">
+      <section className="relative z-10 py-section">
+        <div className="max-w-4xl mx-auto px-4 text-center space-y-lg">
+          <h2 className="text-display-md sm:text-display-lg font-display text-ink tracking-tight">
             Pronto para transformar sua consultoria?
           </h2>
-          <p className="mt-4 text-lg text-gray-500 max-w-xl mx-auto">
+          <p className="text-body-lg text-stone max-w-xl mx-auto">
             Comece gratuitamente e descubra como o FinansmartAI pode elevar sua gestão de investimentos.
           </p>
-          <div className="mt-8">
-            <Link
-              to="/login"
-              className="group inline-flex items-center gap-2 px-8 py-3.5 text-sm font-semibold text-white bg-gray-900 rounded-full hover:bg-gray-800 transition-all duration-200 shadow-lg shadow-gray-900/20"
-            >
+          <Link to="/login">
+            <Button variant="primary" className="inline-flex items-center gap-2">
               Começar Agora — é gratuito
-              <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
-            </Link>
-          </div>
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          </Link>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="relative z-10 border-t border-gray-100 py-8">
+      <footer className="relative z-10 border-t border-hairline-light py-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-semibold text-gray-900">FinansmartAI</span>
-            </div>
-            <p className="text-sm text-gray-400">
+            <span className="text-body-md font-semibold text-ink">FinansmartAI</span>
+            <p className="text-body-sm text-stone">
               © {new Date().getFullYear()} FinansmartAI. Todos os direitos reservados.
             </p>
           </div>
