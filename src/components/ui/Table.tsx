@@ -3,53 +3,62 @@ import { ReactNode } from 'react';
 interface TableProps {
   children?: ReactNode;
   className?: string;
+  variant?: 'light' | 'dark';
 }
 
-export const Table = ({ children, className = '' }: TableProps) => {
+export const Table = ({ children, className = '', variant = 'light' }: TableProps) => {
+  const borderColor = variant === 'light' ? 'divide-hairline-light' : 'divide-hairline-dark';
   return (
-    <div className="overflow-x-auto">
-      <table className={`min-w-full divide-y divide-gray-200 ${className}`}>
+    <div className="overflow-x-auto rounded-lg border border-hairline-light">
+      <table className={`min-w-full divide-y ${borderColor} ${className}`}>
         {children}
       </table>
     </div>
   );
 };
 
-export const TableHeader = ({ children }: TableProps) => {
+export const TableHeader = ({ children, variant = 'light' }: TableProps) => {
+  const bgColor = variant === 'light' ? 'bg-surface-soft' : 'bg-surface-elevated';
+  const textColor = variant === 'light' ? 'text-ink' : 'text-on-dark';
   return (
-    <thead className="bg-gray-50">
+    <thead className={`${bgColor} ${textColor}`}>
       {children}
     </thead>
   );
 };
 
-export const TableBody = ({ children }: TableProps) => {
+export const TableBody = ({ children, variant = 'light' }: TableProps) => {
+  const bgColor = variant === 'light' ? 'bg-surface-card' : 'bg-canvas-dark';
+  const borderColor = variant === 'light' ? 'divide-hairline-light' : 'divide-hairline-dark';
   return (
-    <tbody className="bg-white divide-y divide-gray-200">
+    <tbody className={`${bgColor} divide-y ${borderColor}`}>
       {children}
     </tbody>
   );
 };
 
-export const TableRow = ({ children, className = '' }: TableProps) => {
+export const TableRow = ({ children, className = '', variant = 'light' }: TableProps) => {
+  const hoverColor = variant === 'light' ? 'hover:bg-surface-soft' : 'hover:bg-surface-deep';
   return (
-    <tr className={`hover:bg-gray-50 transition-colors ${className}`}>
+    <tr className={`${hoverColor} transition-colors ${className}`}>
       {children}
     </tr>
   );
 };
 
-export const TableHead = ({ children, className = '' }: TableProps) => {
+export const TableHead = ({ children, className = '', variant = 'light' }: TableProps) => {
+  const textColor = variant === 'light' ? 'text-mute' : 'text-on-dark-mute';
   return (
-    <th className={`px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${className}`}>
+    <th className={`px-lg py-3 text-left text-caption font-medium ${textColor} uppercase tracking-wider ${className}`}>
       {children}
     </th>
   );
 };
 
-export const TableCell = ({ children, className = '' }: TableProps) => {
+export const TableCell = ({ children, className = '', variant = 'light' }: TableProps) => {
+  const textColor = variant === 'light' ? 'text-body-md text-ink' : 'text-body-md text-on-dark';
   return (
-    <td className={`px-6 py-4 whitespace-nowrap text-sm text-gray-900 ${className}`}>
+    <td className={`px-lg py-4 whitespace-nowrap ${textColor} ${className}`}>
       {children}
     </td>
   );
